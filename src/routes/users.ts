@@ -1,11 +1,12 @@
 import Router from 'koa-router'
-import {createUser, updateUser} from '~/controllers/usersController'
+import {createUser, loginUser, updateUser} from '~/controllers/users'
 import {validate} from '~/middlewares/validate'
-import {UserSchema, PartialUserSchema} from '~/models/user'
+import {UserSchema, PartialUserSchema, LoginUserSchema} from '~/dtos/user'
 
 const router = new Router({prefix: '/users'})
 
 router.post('/new', validate(UserSchema), createUser)
 router.put('/:id', validate(PartialUserSchema), updateUser)
+router.post('/login', validate(LoginUserSchema), loginUser)
 
 export default router
