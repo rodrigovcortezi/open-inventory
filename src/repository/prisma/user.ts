@@ -1,7 +1,8 @@
 import type {CreateUserDto, UpdateUserDto} from '~/dtos/user'
 import {prisma} from '~/prisma'
+import type {UserRepository} from '../user'
 
-export const createUserRepository = () => ({
+export const createUserRepository = (): UserRepository => ({
   create: async (data: CreateUserDto) => {
     return await prisma.user.create({data})
   },
