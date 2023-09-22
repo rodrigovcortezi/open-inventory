@@ -1,6 +1,7 @@
 import type {Context} from 'koa'
 import {createPrismaRepository} from '~/repository/prisma'
 import {userService} from '~/services/users'
+import {ControllerError} from './error'
 
 const prismaRepository = createPrismaRepository()
 const service = userService(prismaRepository.userRepository)
@@ -18,7 +19,7 @@ const loginUser = async (ctx: Context) => {
 const updateUser = async (ctx: Context) => {
   const userId = parseInt(ctx.params.id)
   if (isNaN(userId)) {
-    ctx.throw(400, 'Invalid id param')
+    throw new ControllerError('Invalid param')
   }
 
   const user = await service.updateUser(userId, ctx.request.body)
