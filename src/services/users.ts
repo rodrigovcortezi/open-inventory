@@ -4,6 +4,12 @@ import {ServiceError} from './error'
 import jwt from 'jsonwebtoken'
 import type {UserRepository} from '~/repository/user'
 import type {User} from '~/models/user'
+import type {BusinessRepository} from '~/repository/business'
+
+type UserServiceParams = {
+  userRepository: UserRepository
+  businessRepository: BusinessRepository
+}
 
 const filterSensitiveData = (user: User) => {
   const {name, email} = user
@@ -17,21 +23,34 @@ const generateAccessToken = (user: User) => {
   })
 }
 
-export const userService = (repository: UserRepository) => ({
+export const userService = ({
+  userRepository,
+  businessRepository,
+}: UserServiceParams) => ({
   registerUser: async (userData: CreateUserDto) => {
-    const userExists = Boolean(await repository.findByEmail(userData.email))
+    const userExists = Boolean(await userRepository.findByEmail(userData.email))
     if (userExists) {
       throw new ServiceError('Email is already in use', 400)
     }
 
+    const businessExists = Boolean(
+      await businessRepository.findByCNPJ(userData.business.cnpj),
+    )
+    if (businessExists) {
+      throw new ServiceError('Business already exists', 400)
+    }
+
     const passwordHash = await bcrypt.hash(userData.password, 10)
-    const user = await repository.create({...userData, password: passwordHash})
+    const user = await userRepository.create({
+      ...userData,
+      password: passwordHash,
+    })
     return filterSensitiveData(user)
   },
 
   loginUser: async (userData: LoginUserDto) => {
     const {email} = userData
-    const user = await repository.findByEmail(email)
+    const user = await userRepository.findByEmail(email)
     if (!user) {
       throw new ServiceError('User not found', 404)
     }
@@ -45,7 +64,7 @@ export const userService = (repository: UserRepository) => ({
   },
 
   updateUser: async (id: number, userData: UpdateUserDto) => {
-    const user = await repository.update(id, userData)
+    const user = await userRepository.update(id, userData)
     return filterSensitiveData(user)
   },
 })

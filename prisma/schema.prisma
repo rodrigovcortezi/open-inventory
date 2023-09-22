@@ -10,11 +10,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Business {
+  id   Int    @id @default(autoincrement())
+  name String
+  cnpj String @unique
+  User User[]
+}
+
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String
-  password  String
-  createdAt DateTime @default(now())
-  updateAt  DateTime @updatedAt
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  name       String
+  password   String
+  business   Business @relation(fields: [businessId], references: [id])
+  businessId Int
+  createdAt  DateTime @default(now())
+  updateAt   DateTime @updatedAt
 }
