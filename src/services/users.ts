@@ -19,6 +19,11 @@ const generateAccessToken = (user: User) => {
 
 export const userService = (repository: UserRepository) => ({
   registerUser: async (userData: CreateUserDto) => {
+    const userExists = Boolean(await repository.findByEmail(userData.email))
+    if (userExists) {
+      throw new ServiceError('Email is already in use', 400)
+    }
+
     const passwordHash = await bcrypt.hash(userData.password, 10)
     const user = await repository.create({...userData, password: passwordHash})
     return filterSensitiveData(user)
