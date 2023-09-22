@@ -4,11 +4,7 @@ import {ServiceError} from './error'
 import jwt from 'jsonwebtoken'
 import type {UserRepository} from '~/repository/user'
 import {RepositoryError} from '~/repository/error'
-
-type SafeUser = {
-  name: string
-  email: string
-}
+import type {User} from '~/models/user'
 
 const handleError = async <T>(fn: () => T) => {
   try {
@@ -21,8 +17,14 @@ const handleError = async <T>(fn: () => T) => {
   }
 }
 
-const generateAccessToken = (user: SafeUser) => {
-  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET as string, {
+const filterSensitiveData = (user: User) => {
+  const {name, email} = user
+  return {name, email}
+}
+
+const generateAccessToken = (user: User) => {
+  const safeUser = filterSensitiveData(user)
+  return jwt.sign(safeUser, process.env.ACCESS_TOKEN_SECRET as string, {
     expiresIn: '60 days',
   })
 }
@@ -33,7 +35,7 @@ export const userService = (repository: UserRepository) => ({
     const user = await handleError(() =>
       repository.create({...userData, password: passwordHash}),
     )
-    return user
+    return filterSensitiveData(user)
   },
 
   loginUser: async (userData: LoginUserDto) => {
@@ -44,15 +46,13 @@ export const userService = (repository: UserRepository) => ({
     }
 
     if (await bcrypt.compare(userData.password, user.password)) {
-      const {name, email} = user
-      const safeUser: SafeUser = {name, email}
-      const token = generateAccessToken(safeUser)
-      return {...safeUser, token}
+      const token = generateAccessToken(user)
+      return {...filterSensitiveData(user), token}
     }
   },
 
   updateUser: async (id: number, userData: UpdateUserDto) => {
     const user = await handleError(() => repository.update(id, userData))
-    return user
+    return filterSensitiveData(user)
   },
 })
