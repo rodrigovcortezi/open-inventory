@@ -3,7 +3,6 @@ import {
   PrismaClientUnknownRequestError,
 } from '@prisma/client/runtime/library'
 import type {CreateUserDto, UpdateUserDto} from '~/dtos/user'
-import {User} from '~/models/user'
 import {prisma} from '~/prisma'
 import {RepositoryError} from '../error'
 
@@ -21,18 +20,15 @@ const handleError = async <T>(fn: () => T) => {
 }
 
 export const createUserRepository = () => ({
-  create: async (data: CreateUserDto): Promise<User | undefined> => {
+  create: async (data: CreateUserDto) => {
     return await handleError(() => prisma.user.create({data}))
   },
 
-  findByEmail: async (email: string): Promise<User | null | undefined> => {
+  findByEmail: async (email: string) => {
     return await handleError(() => prisma.user.findUnique({where: {email}}))
   },
 
-  update: async (
-    id: number,
-    data: UpdateUserDto,
-  ): Promise<User | undefined> => {
+  update: async (id: number, data: UpdateUserDto) => {
     return await handleError(() => prisma.user.update({where: {id}, data}))
   },
 })
