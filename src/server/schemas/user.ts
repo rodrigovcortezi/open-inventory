@@ -23,8 +23,8 @@ export const LoginUserSchema = UserSchema.merge(HasPassword).omit({
   business: true,
 })
 
-export type CreateUserDto = z.infer<typeof CreateUserSchema>
+export type CreateUserReq = z.infer<typeof CreateUserSchema>
 
-export type UpdateUserDto = z.infer<typeof PartialUserSchema>
+export type UpdateUserReq = z.infer<typeof PartialUserSchema>
 
-export type LoginUserDto = z.infer<typeof LoginUserSchema>
+export type LoginUserReq = z.infer<typeof LoginUserSchema>

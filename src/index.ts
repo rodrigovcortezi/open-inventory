@@ -1,16 +1,12 @@
-import Koa from 'koa'
-import bodyParser from '@koa/bodyparser'
-import cors from '@koa/cors'
-import router from '~/routes'
-import {error as errorMiddleware} from '~/middlewares/error'
+import {createBusinessRepository} from './repository/prisma/business'
+import {createUserRepository} from './repository/prisma/user'
+import {createServer} from './server'
+import {createUserService} from './usecases/users'
 
-const app = new Koa()
+const userRepository = createUserRepository()
+const businessRepository = createBusinessRepository()
 
-app.use(bodyParser())
-app.use(cors())
+const userService = createUserService({userRepository, businessRepository})
+const server = createServer({config: {port: 3000}, userService})
 
-app.use(errorMiddleware)
-
-app.use(router.routes()).use(router.allowedMethods())
-
-app.listen(3000)
+server.init()

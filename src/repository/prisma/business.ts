@@ -1,4 +1,4 @@
-import {prisma} from '~/prisma'
+import {prisma} from '.'
 import {BusinessRepository} from '../business'
 
 export const createBusinessRepository = (): BusinessRepository => ({

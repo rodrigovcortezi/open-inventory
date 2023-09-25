@@ -12,10 +12,9 @@ type ResponseParams = {
   err?: Error
 }
 
-export const buildResponse = ({data, err}: ResponseParams) => {
-  let response: Response
+export const buildResponse = ({data, err}: ResponseParams): Response => {
   if (err) {
-    response = {
+    return {
       success: false,
       error: {
         message: err.message,
@@ -23,10 +22,9 @@ export const buildResponse = ({data, err}: ResponseParams) => {
       },
     }
   } else {
-    response = {
+    return {
       success: true,
       data,
     }
   }
-  return response
 }

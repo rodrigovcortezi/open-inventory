@@ -1,6 +1,6 @@
 import {Context, Next} from 'koa'
 import {z} from 'zod'
-import {buildResponse} from '~/utils/response'
+import {buildResponse} from '~/server/response'
 
 class ValidationError extends Error {
   details: unknown

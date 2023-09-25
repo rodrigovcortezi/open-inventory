@@ -1,7 +1,7 @@
 import type {Context, Next} from 'koa'
-import {ControllerError} from '~/controllers/error'
-import {ServiceError} from '~/services/error'
-import {buildResponse} from '~/utils/response'
+import {ControllerError} from '~/server/controllers/error'
+import {ServiceError} from '~/usecases/error'
+import {buildResponse} from '~/server/response'
 
 export const error = async (ctx: Context, next: Next) => {
   try {

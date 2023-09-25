@@ -1,22 +1,27 @@
-import type {CreateUserDto, UpdateUserDto} from '~/dtos/user'
-import {prisma} from '~/prisma'
-import type {UserRepository} from '../user'
+import type {CreateUserDTO, UpdateUserDTO, UserRepository} from '../user'
+import {prisma} from '.'
 
 export const createUserRepository = (): UserRepository => ({
-  create: async (userData: CreateUserDto) => {
-    const data = {
-      name: userData.name,
-      email: userData.email,
-      password: userData.password,
-      business: {
-        create: {...userData.business},
-      },
-    }
+  create: async (userData: CreateUserDTO) => {
     return await prisma.user.create({
-      data,
+      data: {
+        name: userData.name,
+        email: userData.email,
+        password: userData.password,
+        business: {
+          create: {...userData.business},
+        },
+      },
       include: {
         business: true,
       },
+    })
+  },
+
+  findByID: async (id: number) => {
+    return await prisma.user.findUnique({
+      where: {id},
+      include: {business: true},
     })
   },
 
@@ -27,7 +32,7 @@ export const createUserRepository = (): UserRepository => ({
     })
   },
 
-  update: async (id: number, data: UpdateUserDto) => {
+  update: async (id: number, data: UpdateUserDTO) => {
     return await prisma.user.update({
       where: {id},
       data,
