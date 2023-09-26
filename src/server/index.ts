@@ -6,14 +6,14 @@ import {error as errorMiddleware} from '~/server/middlewares/error'
 import type {UserService} from './controllers/user'
 
 type ServerParams = {
-  config: {
+  config?: {
     port?: number
   }
   userService: UserService
 }
 
 export const createServer = ({
-  config: {port = 3000},
+  config: {port = 3000} = {},
   userService,
 }: ServerParams) => {
   const app = new Koa()
@@ -31,6 +31,7 @@ export const createServer = ({
   }
 
   return {
+    app,
     init,
   }
 }
