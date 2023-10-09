@@ -40,6 +40,7 @@ export type LoginUserUseCase = (
 export type UpdateUserUseCase = (
   id: number,
   userData: UpdateUserDTO,
+  loggedUserEmail: string,
 ) => Promise<SafeUser>
 
 type UserServiceParams = {
@@ -99,10 +100,18 @@ export const createUserService = ({
     }
   },
 
-  updateUser: async (id: number, userData: UpdateUserDTO) => {
-    const userExists = Boolean(await userRepository.findByID(id))
+  updateUser: async (
+    id: number,
+    userData: UpdateUserDTO,
+    loggedUserEmail: string,
+  ) => {
+    const userExists = await userRepository.findByID(id)
     if (!userExists) {
       throw new ServiceError('User not found', 404)
+    }
+
+    if (loggedUserEmail !== userExists.email) {
+      throw new ServiceError('Logged user cannot update other user', 403)
     }
 
     const user = await userRepository.update(id, userData)

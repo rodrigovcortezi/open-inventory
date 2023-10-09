@@ -6,6 +6,7 @@ import {
   LoginUserSchema,
   PartialUserSchema,
 } from '~/server/schemas/user'
+import {authenticate} from '../middlewares/authenticate'
 
 type UserRouterParams = {
   service: UserService
@@ -16,7 +17,7 @@ export const createUserRouter = ({service}: UserRouterParams) => {
 
   const router = new Router({prefix: '/users'})
   router.post('/new', validate(CreateUserSchema), createUser)
-  router.put('/:id', validate(PartialUserSchema), updateUser)
+  router.put('/:id', validate(PartialUserSchema), authenticate, updateUser)
   router.post('/login', validate(LoginUserSchema), loginUser)
 
   return router
