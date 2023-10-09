@@ -17,7 +17,7 @@ export type UpdateUserDTO = {
 
 export interface UserRepository {
   create: (user: CreateUserDTO) => Promise<User>
-  update: (id: number, user: UpdateUserDTO) => Promise<User>
+  update: (id: number, data: UpdateUserDTO) => Promise<User>
   findByEmail: (email: string) => Promise<User | null>
   findByID: (id: number) => Promise<User | null>
 }

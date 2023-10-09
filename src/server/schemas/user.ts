@@ -1,17 +1,12 @@
 import {z} from 'zod'
-import {cnpj} from 'cpf-cnpj-validator'
+import {BusinessSchema} from './business'
 
 const HasPassword = z.object({password: z.string().min(8)})
 
 export const UserSchema = z.object({
   name: z.string().trim(),
   email: z.string().trim().email(),
-  business: z.object({
-    name: z.string(),
-    cnpj: z
-      .string()
-      .refine(val => cnpj.isValid(val), {message: 'Invalid CNPJ number'}),
-  }),
+  business: BusinessSchema,
 })
 
 export const CreateUserSchema = UserSchema.merge(HasPassword)

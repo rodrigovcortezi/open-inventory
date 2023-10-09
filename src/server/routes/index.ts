@@ -1,21 +1,21 @@
 import Router from 'koa-router'
 import {createUserRouter} from './users'
-import type {
-  LoginUserUseCase,
-  RegisterUserUseCase,
-  UpdateUserUseCase,
-} from '~/usecases/users'
+import type {UserService} from '../controllers/user'
+import type {BusinessService} from '../controllers/business'
+import {createBusinessRouter} from './business'
 
 type RouterParams = {
-  userService: {
-    registerUser: RegisterUserUseCase
-    loginUser: LoginUserUseCase
-    updateUser: UpdateUserUseCase
-  }
+  userService: UserService
+  businessService: BusinessService
 }
 
-export const createRouter = ({userService}: RouterParams) => {
+export const createRouter = ({userService, businessService}: RouterParams) => {
   const mainRouter = new Router()
   const userRouter = createUserRouter({service: userService})
-  return mainRouter.use(userRouter.routes())
+  const businessRouter = createBusinessRouter({service: businessService})
+
+  mainRouter.use(userRouter.routes())
+  mainRouter.use(businessRouter.routes())
+
+  return mainRouter
 }
