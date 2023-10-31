@@ -5,6 +5,7 @@ import {createRouter} from '~/server/routes'
 import {error as errorMiddleware} from '~/server/middlewares/error'
 import type {UserService} from './controllers/user'
 import type {BusinessService} from './controllers/business'
+import type {SupplierService} from './controllers/supplier'
 
 type ServerParams = {
   config?: {
@@ -12,12 +13,14 @@ type ServerParams = {
   }
   userService: UserService
   businessService: BusinessService
+  supplierService: SupplierService
 }
 
 export const createServer = ({
   config: {port = 3000} = {},
   userService,
   businessService,
+  supplierService,
 }: ServerParams) => {
   const app = new Koa()
 
@@ -26,7 +29,7 @@ export const createServer = ({
 
   app.use(errorMiddleware)
 
-  const router = createRouter({userService, businessService})
+  const router = createRouter({userService, businessService, supplierService})
   app.use(router.routes()).use(router.allowedMethods())
 
   const init = () => {

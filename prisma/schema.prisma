@@ -11,10 +11,11 @@ datasource db {
 }
 
 model Business {
-  id   Int    @id @default(autoincrement())
-  name String
-  cnpj String @unique
-  User User[]
+  id       Int        @id @default(autoincrement())
+  name     String
+  cnpj     String     @unique
+  User     User[]
+  Supplier Supplier[]
 }
 
 model User {
@@ -26,4 +27,12 @@ model User {
   businessId Int
   createdAt  DateTime @default(now())
   updateAt   DateTime @updatedAt
+}
+
+model Supplier {
+  id         Int      @id @default(autoincrement())
+  code       String   @unique
+  name       String
+  business   Business @relation(fields: [businessId], references: [id])
+  businessId Int
 }
