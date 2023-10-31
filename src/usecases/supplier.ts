@@ -18,6 +18,11 @@ export type RegisterSupplierUseCase = (
   supplierData: RegisterSupplierDTO,
 ) => Promise<Supplier>
 
+export type DeleteSupplierUseCase = (
+  loggedUserEmail: string,
+  id: number,
+) => Promise<Supplier>
+
 export const createSupplierService = ({
   userRepository,
   supplierRepository,
@@ -36,6 +41,25 @@ export const createSupplierService = ({
       code: UniqueCharOTP(5),
       businessId: user.business.id as number,
     })
+    return supplier
+  },
+  deleteSupplier: async (loggedUserEmail: string, id: number) => {
+    const user = await userRepository.findByEmail(loggedUserEmail)
+    if (!user) {
+      throw new ServiceError('User not found.', 404)
+    }
+
+    const supplier = await supplierRepository.findById(id)
+    if (!supplier) {
+      throw new ServiceError('Supplier not found', 404)
+    }
+
+    if (user.business.id !== supplier.business.id) {
+      throw new ServiceError('Supplier belongs to other business', 403)
+    }
+
+    await supplierRepository.delete(id)
+
     return supplier
   },
 })
