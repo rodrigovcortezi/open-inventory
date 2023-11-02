@@ -16,6 +16,7 @@ model Business {
   cnpj     String     @unique
   User     User[]
   Supplier Supplier[]
+  Product  Product[]
 }
 
 model User {
@@ -35,4 +36,14 @@ model Supplier {
   name       String
   business   Business @relation(fields: [businessId], references: [id])
   businessId Int
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  sku         String   @unique
+  ean         String
+  business    Business @relation(fields: [businessId], references: [id])
+  businessId  Int
 }
