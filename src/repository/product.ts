@@ -9,5 +9,7 @@ export type CreateProductDTO = {
 }
 
 export interface ProductRepository {
+  findById: (id: number) => Promise<Product | null>
   create: (data: CreateProductDTO) => Promise<Product>
+  delete: (id: number) => Promise<Product>
 }

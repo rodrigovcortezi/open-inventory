@@ -12,10 +12,11 @@ type ProductRouterParams = {
 }
 
 export const createProductRouter = ({service}: ProductRouterParams) => {
-  const {registerProduct} = createProductController({service})
+  const {registerProduct, deleteProduct} = createProductController({service})
 
   const router = new Router({prefix: '/products'})
   router.post('/', validate(CreateProductSchema), authenticate, registerProduct)
+  router.delete('/:id', authenticate, deleteProduct)
 
   return router
 }

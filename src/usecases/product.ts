@@ -20,6 +20,11 @@ export type RegisterProductUseCase = (
   productData: RegisterProductDTO,
 ) => Promise<Product>
 
+export type DeleteProductUseCase = (
+  loggedUserEmail: string,
+  id: number,
+) => Promise<Product>
+
 export const createProductService = ({
   userRepository,
   productRepository,
@@ -37,6 +42,25 @@ export const createProductService = ({
       ...productData,
       businessId: user.business.id as number,
     })
+
+    return product
+  },
+  deleteProduct: async (loggedUserEmail: string, id: number) => {
+    const user = await userRepository.findByEmail(loggedUserEmail)
+    if (!user) {
+      throw new ServiceError('User not found', 404)
+    }
+
+    const product = await productRepository.findById(id)
+    if (!product) {
+      throw new ServiceError('Product not found', 404)
+    }
+
+    if (user.business.id !== product.business.id) {
+      throw new ServiceError('Product does not belong to user business', 403)
+    }
+
+    await productRepository.delete(id)
 
     return product
   },
