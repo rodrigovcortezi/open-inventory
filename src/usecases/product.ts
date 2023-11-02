@@ -1,5 +1,5 @@
 import type {Product} from '~/models/product'
-import type {ProductRepository, UpdateProductDTO} from '~/repository/product'
+import type {ProductRepository} from '~/repository/product'
 import type {UserRepository} from '~/repository/user'
 import {ServiceError} from './error'
 
@@ -13,6 +13,13 @@ type RegisterProductDTO = {
   description?: string
   sku: string
   ean: string
+}
+
+type UpdateProductDTO = {
+  name?: string
+  description?: string
+  sku?: string
+  ean?: string
 }
 
 export type RegisterProductUseCase = (

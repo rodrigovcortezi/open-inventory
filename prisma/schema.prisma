@@ -11,12 +11,13 @@ datasource db {
 }
 
 model Business {
-  id       Int        @id @default(autoincrement())
-  name     String
-  cnpj     String     @unique
-  User     User[]
-  Supplier Supplier[]
-  Product  Product[]
+  id        Int         @id @default(autoincrement())
+  name      String
+  cnpj      String      @unique
+  User      User[]
+  Supplier  Supplier[]
+  Product   Product[]
+  Inventory Inventory[]
 }
 
 model User {
@@ -46,4 +47,12 @@ model Product {
   ean         String
   business    Business @relation(fields: [businessId], references: [id])
   businessId  Int
+}
+
+model Inventory {
+  id         Int      @id @default(autoincrement())
+  name       String
+  code       String   @unique
+  business   Business @relation(fields: [businessId], references: [id])
+  businessId Int
 }
