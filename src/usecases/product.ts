@@ -1,5 +1,5 @@
 import type {Product} from '~/models/product'
-import type {ProductRepository} from '~/repository/product'
+import type {ProductRepository, UpdateProductDTO} from '~/repository/product'
 import type {UserRepository} from '~/repository/user'
 import {ServiceError} from './error'
 
@@ -18,6 +18,12 @@ type RegisterProductDTO = {
 export type RegisterProductUseCase = (
   loggedUserEmail: string,
   productData: RegisterProductDTO,
+) => Promise<Product>
+
+export type UpdateProductUseCase = (
+  loggedUserEmail: string,
+  id: number,
+  productData: UpdateProductDTO,
 ) => Promise<Product>
 
 export type DeleteProductUseCase = (
@@ -44,6 +50,29 @@ export const createProductService = ({
     })
 
     return product
+  },
+  updateProduct: async (
+    loggedUserEmail: string,
+    id: number,
+    productData: UpdateProductDTO,
+  ) => {
+    const user = await userRepository.findByEmail(loggedUserEmail)
+    if (!user) {
+      throw new ServiceError('User not found', 404)
+    }
+
+    const product = await productRepository.findById(id)
+    if (!product) {
+      throw new ServiceError('Product not found', 404)
+    }
+
+    if (user.business.id !== product.business.id) {
+      throw new ServiceError('Product does not belong to user business', 403)
+    }
+
+    const changedProduct = await productRepository.update(id, productData)
+
+    return changedProduct
   },
   deleteProduct: async (loggedUserEmail: string, id: number) => {
     const user = await userRepository.findByEmail(loggedUserEmail)
