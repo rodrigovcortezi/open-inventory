@@ -40,19 +40,30 @@ model Supplier {
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String?
-  sku         String   @unique
-  ean         String
-  business    Business @relation(fields: [businessId], references: [id])
-  businessId  Int
+  id               Int                @id @default(autoincrement())
+  name             String
+  description      String?
+  sku              String             @unique
+  ean              String
+  business         Business           @relation(fields: [businessId], references: [id])
+  businessId       Int
+  InventoryProduct InventoryProduct[]
 }
 
 model Inventory {
-  id         Int      @id @default(autoincrement())
-  name       String
-  code       String   @unique
-  business   Business @relation(fields: [businessId], references: [id])
-  businessId Int
+  id               Int                @id @default(autoincrement())
+  name             String
+  code             String             @unique
+  business         Business           @relation(fields: [businessId], references: [id])
+  businessId       Int
+  InventoryProduct InventoryProduct[]
+}
+
+model InventoryProduct {
+  id          Int       @id @default(autoincrement())
+  inventory   Inventory @relation(fields: [inventoryId], references: [id])
+  inventoryId Int
+  product     Product   @relation(fields: [productId], references: [id])
+  productId   Int
+  quantity    Int       @default(0)
 }

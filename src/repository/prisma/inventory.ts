@@ -12,6 +12,12 @@ export const createInventoryRepository = (): InventoryRepository => ({
       include: {business: true},
     })
   },
+  findByCode: async (code: string) => {
+    return await prisma.inventory.findUnique({
+      where: {code},
+      include: {business: true},
+    })
+  },
   create: async (data: CreateInventoryDTO) => {
     return await prisma.inventory.create({data, include: {business: true}})
   },

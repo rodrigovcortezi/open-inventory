@@ -12,6 +12,12 @@ export const createProductRepository = (): ProductRepository => ({
       include: {business: true},
     })
   },
+  findBySku: async (sku: string) => {
+    return await prisma.product.findUnique({
+      where: {sku},
+      include: {business: true},
+    })
+  },
   create: async (data: CreateProductDTO) => {
     return await prisma.product.create({data, include: {business: true}})
   },
