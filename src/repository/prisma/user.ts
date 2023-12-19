@@ -1,13 +1,20 @@
-import type {CreateUserDTO, UpdateUserDTO, UserRepository} from '../user'
+import type {
+  CreateUserDTO,
+  CreateUserWithBusinessDTO,
+  UpdateUserDTO,
+  UserRepository,
+} from '../user'
 import {prisma} from '.'
+import {Role} from '~/models/user'
 
 export const createUserRepository = (): UserRepository => ({
   create: async (userData: CreateUserDTO) => {
-    return await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         name: userData.name,
         email: userData.email,
         password: userData.password,
+        role: Role.ADMIN,
         business: {
           create: {...userData.business},
         },
@@ -16,27 +23,47 @@ export const createUserRepository = (): UserRepository => ({
         business: true,
       },
     })
+    return {...user, role: user.role as Role}
+  },
+
+  createWithBusiness: async (userData: CreateUserWithBusinessDTO) => {
+    const user = await prisma.user.create({
+      data: userData,
+      include: {business: true},
+    })
+    return {...user, role: user.role as Role}
   },
 
   findByID: async (id: number) => {
-    return await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: {id},
       include: {business: true},
     })
+    if (user) {
+      return {...user, role: user.role as Role}
+    } else {
+      return null
+    }
   },
 
   findByEmail: async (email: string) => {
-    return await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: {email},
       include: {business: true},
     })
+    if (user) {
+      return {...user, role: user.role as Role}
+    } else {
+      return null
+    }
   },
 
   update: async (id: number, data: UpdateUserDTO) => {
-    return await prisma.user.update({
+    const user = await prisma.user.update({
       where: {id},
       data,
       include: {business: true},
     })
+    return {...user, role: user.role as Role}
   },
 })

@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt'
 import {ServiceError} from './error'
 import jwt from 'jsonwebtoken'
 import type {UserRepository} from '~/repository/user'
-import {safeUser, type User} from '~/models/user'
+import {Role, safeUser, type User} from '~/models/user'
 import type {BusinessRepository} from '~/repository/business'
 import type {SafeUser} from '~/models/user'
 
@@ -18,6 +18,12 @@ type RegisterUserDTO = {
   }
 }
 
+type AddUserDTO = {
+  name: string
+  email: string
+  password: string
+}
+
 type LoginUserDTO = {
   email: string
   password: string
@@ -30,6 +36,11 @@ type UpdateUserDTO = {
 
 export type RegisterUserUseCase = (
   userData: RegisterUserDTO,
+) => Promise<SafeUser>
+
+export type AddUserUseCase = (
+  userData: AddUserDTO,
+  loggedUserEmail: string,
 ) => Promise<SafeUser>
 
 export type LoginUserUseCase = (
@@ -74,8 +85,31 @@ export const createUserService = ({
     const passwordHash = await bcrypt.hash(userData.password, 10)
     const user = await userRepository.create({
       ...userData,
+      role: Role.ADMIN,
       password: passwordHash,
     })
+    return safeUser(user)
+  },
+
+  addUser: async (userData: AddUserDTO, loggedUserEmail: string) => {
+    const userExists = Boolean(await userRepository.findByEmail(userData.email))
+    if (userExists) {
+      throw new ServiceError('Email is already in use', 422)
+    }
+
+    const authUser = (await userRepository.findByEmail(loggedUserEmail)) as User
+    if (authUser.role != Role.ADMIN) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    const passwordHash = await bcrypt.hash(userData.password, 10)
+    const user = await userRepository.createWithBusiness({
+      ...userData,
+      password: passwordHash,
+      role: Role.ADMIN,
+      businessId: authUser.business.id,
+    })
+
     return safeUser(user)
   },
 

@@ -4,7 +4,7 @@ import {BusinessSchema} from './business'
 const HasPassword = z.object({password: z.string().min(8)})
 
 export const UserSchema = z.object({
-  name: z.string().trim(),
+  name: z.string().trim().min(1),
   email: z.string().trim().email(),
   business: BusinessSchema,
 })
@@ -17,6 +17,8 @@ export const LoginUserSchema = UserSchema.merge(HasPassword).omit({
   name: true,
   business: true,
 })
+
+export const AddUserSchema = CreateUserSchema.omit({business: true})
 
 export type CreateUserReq = z.infer<typeof CreateUserSchema>
 

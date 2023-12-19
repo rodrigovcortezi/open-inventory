@@ -2,6 +2,7 @@ import Router from 'koa-router'
 import {createUserController, type UserService} from '~/server/controllers/user'
 import {validate} from '~/server/middlewares/validate'
 import {
+  AddUserSchema,
   CreateUserSchema,
   LoginUserSchema,
   PartialUserSchema,
@@ -13,10 +14,13 @@ type UserRouterParams = {
 }
 
 export const createUserRouter = ({service}: UserRouterParams) => {
-  const {createUser, updateUser, loginUser} = createUserController({service})
+  const {createUser, addUser, updateUser, loginUser} = createUserController({
+    service,
+  })
 
   const router = new Router()
   router.post('/users', validate(CreateUserSchema), createUser)
+  router.post('/admin-users', validate(AddUserSchema), authenticate, addUser)
   router.put(
     '/users/:id',
     validate(PartialUserSchema),
