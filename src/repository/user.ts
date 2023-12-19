@@ -22,6 +22,7 @@ export type CreateUserWithBusinessDTO = {
   password: string
   role: Role
   businessId: number
+  supplierId?: number
 }
 
 export interface UserRepository {

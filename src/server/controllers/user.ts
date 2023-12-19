@@ -1,6 +1,8 @@
 import type {Context} from 'koa'
 import type {
-  AddUserUseCase,
+  AddAdminUserUseCase,
+  AddStoreUserUseCase,
+  AddSupplierUserUseCase,
   LoginUserUseCase,
   RegisterUserUseCase,
   UpdateUserUseCase,
@@ -11,7 +13,9 @@ import {UserContext} from '../middlewares/authenticate'
 
 export type UserService = {
   registerUser: RegisterUserUseCase
-  addUser: AddUserUseCase
+  addAdminUser: AddAdminUserUseCase
+  addStoreUser: AddStoreUserUseCase
+  addSupplierUser: AddSupplierUserUseCase
   loginUser: LoginUserUseCase
   updateUser: UpdateUserUseCase
 }
@@ -27,8 +31,26 @@ export const createUserController = ({service}: UserControllerParams) => {
     ctx.status = 201
   }
 
-  const addUser = async (ctx: UserContext) => {
-    const user = await service.addUser(
+  const addAdminUser = async (ctx: UserContext) => {
+    const user = await service.addAdminUser(
+      ctx.request.body,
+      ctx.user?.email as string,
+    )
+    ctx.body = buildResponse({data: user})
+    ctx.status = 201
+  }
+
+  const addStoreUser = async (ctx: UserContext) => {
+    const user = await service.addStoreUser(
+      ctx.request.body,
+      ctx.user?.email as string,
+    )
+    ctx.body = buildResponse({data: user})
+    ctx.status = 201
+  }
+
+  const addSupplierUser = async (ctx: UserContext) => {
+    const user = await service.addSupplierUser(
       ctx.request.body,
       ctx.user?.email as string,
     )
@@ -55,5 +77,12 @@ export const createUserController = ({service}: UserControllerParams) => {
     ctx.body = buildResponse({data: user})
   }
 
-  return {createUser, addUser, loginUser, updateUser}
+  return {
+    createUser,
+    addAdminUser,
+    addStoreUser,
+    addSupplierUser,
+    loginUser,
+    updateUser,
+  }
 }

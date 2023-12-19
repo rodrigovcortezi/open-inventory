@@ -18,7 +18,13 @@ export const LoginUserSchema = UserSchema.merge(HasPassword).omit({
   business: true,
 })
 
-export const AddUserSchema = CreateUserSchema.omit({business: true})
+export const AddAdminUserSchema = CreateUserSchema.omit({business: true})
+
+export const AddStoreUserSchema = CreateUserSchema.omit({business: true})
+
+export const AddSupplierUserSchema = CreateUserSchema.omit({
+  business: true,
+}).extend({supplierCode: z.string().trim()})
 
 export type CreateUserReq = z.infer<typeof CreateUserSchema>
 

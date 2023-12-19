@@ -5,6 +5,7 @@ import type {UserRepository} from '~/repository/user'
 import {Role, safeUser, type User} from '~/models/user'
 import type {BusinessRepository} from '~/repository/business'
 import type {SafeUser} from '~/models/user'
+import type {SupplierRepository} from '~/repository/supplier'
 
 type UserWithToken = SafeUser & {token: string}
 
@@ -18,10 +19,23 @@ type RegisterUserDTO = {
   }
 }
 
-type AddUserDTO = {
+type AddAdminUserDTO = {
   name: string
   email: string
   password: string
+}
+
+type AddStoreUserDTO = {
+  name: string
+  email: string
+  password: string
+}
+
+type AddSupplierUserDTO = {
+  name: string
+  email: string
+  password: string
+  supplierCode: string
 }
 
 type LoginUserDTO = {
@@ -38,8 +52,18 @@ export type RegisterUserUseCase = (
   userData: RegisterUserDTO,
 ) => Promise<SafeUser>
 
-export type AddUserUseCase = (
-  userData: AddUserDTO,
+export type AddAdminUserUseCase = (
+  userData: AddAdminUserDTO,
+  loggedUserEmail: string,
+) => Promise<SafeUser>
+
+export type AddStoreUserUseCase = (
+  userData: AddStoreUserDTO,
+  loggedUserEmail: string,
+) => Promise<SafeUser>
+
+export type AddSupplierUserUseCase = (
+  userData: AddSupplierUserDTO,
   loggedUserEmail: string,
 ) => Promise<SafeUser>
 
@@ -56,6 +80,7 @@ export type UpdateUserUseCase = (
 type UserServiceParams = {
   userRepository: UserRepository
   businessRepository: BusinessRepository
+  supplierRepository: SupplierRepository
 }
 
 const generateAccessToken = (user: User) => {
@@ -68,6 +93,7 @@ const generateAccessToken = (user: User) => {
 export const createUserService = ({
   userRepository,
   businessRepository,
+  supplierRepository,
 }: UserServiceParams) => ({
   registerUser: async (userData: RegisterUserDTO) => {
     const userExists = Boolean(await userRepository.findByEmail(userData.email))
@@ -91,15 +117,15 @@ export const createUserService = ({
     return safeUser(user)
   },
 
-  addUser: async (userData: AddUserDTO, loggedUserEmail: string) => {
-    const userExists = Boolean(await userRepository.findByEmail(userData.email))
-    if (userExists) {
-      throw new ServiceError('Email is already in use', 422)
-    }
-
+  addAdminUser: async (userData: AddAdminUserDTO, loggedUserEmail: string) => {
     const authUser = (await userRepository.findByEmail(loggedUserEmail)) as User
     if (authUser.role != Role.ADMIN) {
       throw new ServiceError('User not allowed', 403)
+    }
+
+    const userExists = Boolean(await userRepository.findByEmail(userData.email))
+    if (userExists) {
+      throw new ServiceError('Email is already in use', 422)
     }
 
     const passwordHash = await bcrypt.hash(userData.password, 10)
@@ -108,6 +134,60 @@ export const createUserService = ({
       password: passwordHash,
       role: Role.ADMIN,
       businessId: authUser.business.id,
+    })
+
+    return safeUser(user)
+  },
+
+  addStoreUser: async (userData: AddStoreUserDTO, loggedUserEmail: string) => {
+    const authUser = (await userRepository.findByEmail(loggedUserEmail)) as User
+    if (authUser.role != Role.ADMIN) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    const userExists = Boolean(await userRepository.findByEmail(userData.email))
+    if (userExists) {
+      throw new ServiceError('Email is already in use', 422)
+    }
+
+    const passwordHash = await bcrypt.hash(userData.password, 10)
+    const user = await userRepository.createWithBusiness({
+      ...userData,
+      password: passwordHash,
+      role: Role.STORE,
+      businessId: authUser.business.id,
+    })
+
+    return safeUser(user)
+  },
+
+  addSupplierUser: async (
+    userData: AddSupplierUserDTO,
+    loggedUserEmail: string,
+  ) => {
+    const authUser = (await userRepository.findByEmail(loggedUserEmail)) as User
+    if (authUser.role != Role.ADMIN) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    const userExists = Boolean(await userRepository.findByEmail(userData.email))
+    if (userExists) {
+      throw new ServiceError('Email is already in use', 422)
+    }
+
+    const supplier = await supplierRepository.findByCode(userData.supplierCode)
+    if (!supplier || supplier.business.id != authUser.business.id) {
+      throw new ServiceError('Supplier not found', 404)
+    }
+
+    const passwordHash = await bcrypt.hash(userData.password, 10)
+    const user = await userRepository.createWithBusiness({
+      name: userData.name,
+      email: userData.email,
+      password: passwordHash,
+      role: Role.SUPPLIER,
+      businessId: authUser.business.id,
+      supplierId: supplier.id,
     })
 
     return safeUser(user)

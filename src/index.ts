@@ -19,7 +19,11 @@ const productRepository = createProductRepository()
 const inventoryRepository = createInventoryRepository()
 const inventoryProductRepository = createInventoryProductRepository()
 
-const userService = createUserService({userRepository, businessRepository})
+const userService = createUserService({
+  userRepository,
+  businessRepository,
+  supplierRepository,
+})
 const businessService = createBusinessService({
   userRepository,
   businessRepository,

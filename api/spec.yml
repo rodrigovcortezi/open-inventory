@@ -255,6 +255,14 @@ paths:
                 success: false
                 error:
                   message: User not allowed
+        404:
+          description: Supplier not found
+          content:
+            application/json:
+              example:
+                success: false
+                error:
+                  message: Supplier not found
         422:
           description: Email already in use
           content:

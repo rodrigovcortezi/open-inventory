@@ -8,6 +8,13 @@ export const createSupplierRepository = (): SupplierRepository => ({
       include: {business: true},
     })
   },
+
+  findByCode: async (code: string) => {
+    return await prisma.supplier.findUnique({
+      where: {code},
+      include: {business: true},
+    })
+  },
   create: async (data: CreateSupplierDTO) => {
     return await prisma.supplier.create({data, include: {business: true}})
   },
