@@ -28,7 +28,7 @@ model User {
   business   Business @relation(fields: [businessId], references: [id])
   businessId Int
   createdAt  DateTime @default(now())
-  updateAt   DateTime @updatedAt
+  updatedAt  DateTime @updatedAt
 }
 
 model Supplier {

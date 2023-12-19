@@ -15,10 +15,15 @@ type UserRouterParams = {
 export const createUserRouter = ({service}: UserRouterParams) => {
   const {createUser, updateUser, loginUser} = createUserController({service})
 
-  const router = new Router({prefix: '/users'})
-  router.post('/new', validate(CreateUserSchema), createUser)
-  router.put('/:id', validate(PartialUserSchema), authenticate, updateUser)
-  router.post('/login', validate(LoginUserSchema), loginUser)
+  const router = new Router()
+  router.post('/users', validate(CreateUserSchema), createUser)
+  router.put(
+    '/users/:id',
+    validate(PartialUserSchema),
+    authenticate,
+    updateUser,
+  )
+  router.post('/users/login', validate(LoginUserSchema), loginUser)
 
   return router
 }

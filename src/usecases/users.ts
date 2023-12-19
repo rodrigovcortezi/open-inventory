@@ -2,10 +2,9 @@ import bcrypt from 'bcrypt'
 import {ServiceError} from './error'
 import jwt from 'jsonwebtoken'
 import type {UserRepository} from '~/repository/user'
-import type {User} from '~/models/user'
+import {safeUser, type User} from '~/models/user'
 import type {BusinessRepository} from '~/repository/business'
-
-type SafeUser = Omit<User, 'password' | 'business' | 'createdAt' | 'updateAt'>
+import type {SafeUser} from '~/models/user'
 
 type UserWithToken = SafeUser & {token: string}
 
@@ -48,14 +47,9 @@ type UserServiceParams = {
   businessRepository: BusinessRepository
 }
 
-const filterSensitiveData = (user: User) => {
-  const {name, email} = user
-  return {name, email}
-}
-
 const generateAccessToken = (user: User) => {
-  const safeUser = filterSensitiveData(user)
-  return jwt.sign(safeUser, process.env.ACCESS_TOKEN_SECRET as string, {
+  const data = safeUser(user)
+  return jwt.sign(data, process.env.ACCESS_TOKEN_SECRET as string, {
     expiresIn: '60 days',
   })
 }
@@ -67,14 +61,14 @@ export const createUserService = ({
   registerUser: async (userData: RegisterUserDTO) => {
     const userExists = Boolean(await userRepository.findByEmail(userData.email))
     if (userExists) {
-      throw new ServiceError('Email is already in use', 400)
+      throw new ServiceError('Email is already in use', 422)
     }
 
     const businessExists = Boolean(
       await businessRepository.findByCNPJ(userData.business.cnpj),
     )
     if (businessExists) {
-      throw new ServiceError('Business already exists', 400)
+      throw new ServiceError('CNPJ is already in use', 422)
     }
 
     const passwordHash = await bcrypt.hash(userData.password, 10)
@@ -82,7 +76,7 @@ export const createUserService = ({
       ...userData,
       password: passwordHash,
     })
-    return filterSensitiveData(user)
+    return safeUser(user)
   },
 
   loginUser: async (userData: LoginUserDTO) => {
@@ -94,7 +88,7 @@ export const createUserService = ({
 
     if (await bcrypt.compare(userData.password, user.password)) {
       const token = generateAccessToken(user)
-      return {...filterSensitiveData(user), token}
+      return {...safeUser(user), token}
     } else {
       throw new ServiceError('Wrong password', 401)
     }
@@ -115,6 +109,6 @@ export const createUserService = ({
     }
 
     const user = await userRepository.update(id, userData)
-    return filterSensitiveData(user)
+    return safeUser(user)
   },
 })

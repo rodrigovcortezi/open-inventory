@@ -22,6 +22,7 @@ export const createUserController = ({service}: UserControllerParams) => {
   const createUser = async (ctx: Context) => {
     const user = await service.registerUser(ctx.request.body)
     ctx.body = buildResponse({data: user})
+    ctx.status = 201
   }
 
   const loginUser = async (ctx: Context) => {
