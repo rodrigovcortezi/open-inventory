@@ -1,11 +1,18 @@
-import type {Product} from '~/models/product'
+import {
+  safeProduct,
+  type Product,
+  type SafeProductWithSupplierCode,
+} from '~/models/product'
 import type {ProductRepository} from '~/repository/product'
 import type {UserRepository} from '~/repository/user'
 import {ServiceError} from './error'
+import {Role} from '~/models/user'
+import type {SupplierRepository} from '~/repository/supplier'
 
 type ProductServiceParams = {
   userRepository: UserRepository
   productRepository: ProductRepository
+  supplierRepository: SupplierRepository
 }
 
 type RegisterProductDTO = {
@@ -13,6 +20,7 @@ type RegisterProductDTO = {
   description?: string
   sku: string
   ean: string
+  supplierCode: string
 }
 
 type UpdateProductDTO = {
@@ -25,7 +33,7 @@ type UpdateProductDTO = {
 export type RegisterProductUseCase = (
   loggedUserEmail: string,
   productData: RegisterProductDTO,
-) => Promise<Product>
+) => Promise<SafeProductWithSupplierCode>
 
 export type UpdateProductUseCase = (
   loggedUserEmail: string,
@@ -41,22 +49,48 @@ export type DeleteProductUseCase = (
 export const createProductService = ({
   userRepository,
   productRepository,
+  supplierRepository,
 }: ProductServiceParams) => ({
   registerProduct: async (
     loggedUserEmail: string,
     productData: RegisterProductDTO,
   ) => {
-    const user = await userRepository.findByEmail(loggedUserEmail)
-    if (!user) {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
       throw new ServiceError('User not found', 404)
     }
 
+    if (authUser.role !== Role.ADMIN) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    const supplier = await supplierRepository.findByCode(
+      productData.supplierCode,
+    )
+    if (!supplier || supplier.businessId !== authUser.businessId) {
+      throw new ServiceError('Supplier not found', 404)
+    }
+
+    const productExists = Boolean(
+      await productRepository.findByBusinessIdAndSKU(
+        authUser.businessId,
+        productData.sku,
+      ),
+    )
+    if (productExists) {
+      throw new ServiceError('SKU is already in use', 422)
+    }
+
     const product = await productRepository.create({
-      ...productData,
-      businessId: user.business.id as number,
+      name: productData.name,
+      description: productData.description,
+      sku: productData.sku,
+      ean: productData.ean,
+      supplierId: supplier.id,
+      businessId: authUser.businessId,
     })
 
-    return product
+    return {...safeProduct(product), supplierCode: supplier.code}
   },
   updateProduct: async (
     loggedUserEmail: string,
@@ -73,7 +107,7 @@ export const createProductService = ({
       throw new ServiceError('Product not found', 404)
     }
 
-    if (user.business.id !== product.business.id) {
+    if (user.business.id !== product.businessId) {
       throw new ServiceError('Product does not belong to user business', 403)
     }
 
@@ -92,7 +126,7 @@ export const createProductService = ({
       throw new ServiceError('Product not found', 404)
     }
 
-    if (user.business.id !== product.business.id) {
+    if (user.business.id !== product.businessId) {
       throw new ServiceError('Product does not belong to user business', 403)
     }
 

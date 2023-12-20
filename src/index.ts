@@ -30,6 +30,7 @@ const supplierService = createSupplierService({
 const productService = createProductService({
   userRepository,
   productRepository,
+  supplierRepository,
 })
 const inventoryService = createInventoryService({
   userRepository,

@@ -5,14 +5,14 @@ export type Supplier = {
   name: string
   code: string
   cnpj: string
+  businessId: number
 }
 
 export type SupplierWithBusiness = Supplier & {
   business: Business
-  businessId: number
 }
 
-export type SafeSupplier = Omit<Supplier, 'id'>
+export type SafeSupplier = Omit<Supplier, 'id' | 'businessId'>
 
 export type SafeSupplierWithBusiness = SafeSupplier & {
   business: SafeBusiness

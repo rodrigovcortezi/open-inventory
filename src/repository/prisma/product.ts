@@ -9,26 +9,26 @@ export const createProductRepository = (): ProductRepository => ({
   findById: async (id: number) => {
     return await prisma.product.findUnique({
       where: {id},
-      include: {business: true},
     })
   },
   findBySku: async (sku: string) => {
-    return await prisma.product.findUnique({
+    return await prisma.product.findFirst({
       where: {sku},
-      include: {business: true},
     })
   },
+  findByBusinessIdAndSKU: async (businessId: number, sku: string) => {
+    return await prisma.product.findFirst({where: {businessId, sku}})
+  },
   create: async (data: CreateProductDTO) => {
-    return await prisma.product.create({data, include: {business: true}})
+    return await prisma.product.create({data})
   },
   update: async (id: number, data: UpdateProductDTO) => {
     return await prisma.product.update({
       where: {id},
       data,
-      include: {business: true},
     })
   },
   delete: async (id: number) => {
-    return await prisma.product.delete({where: {id}, include: {business: true}})
+    return await prisma.product.delete({where: {id}})
   },
 })

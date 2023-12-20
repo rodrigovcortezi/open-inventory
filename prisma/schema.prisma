@@ -41,24 +41,29 @@ model User {
 }
 
 model Supplier {
-  id         Int      @id @default(autoincrement())
-  code       String   @unique
+  id         Int       @id @default(autoincrement())
+  code       String    @unique
   name       String
-  business   Business @relation(fields: [businessId], references: [id])
+  business   Business  @relation(fields: [businessId], references: [id])
   businessId Int
   User       User[]
-  cnpj       String   @unique
+  cnpj       String    @unique
+  Product    Product[]
 }
 
 model Product {
   id               Int                @id @default(autoincrement())
   name             String
   description      String?
-  sku              String             @unique
-  ean              String
+  sku              String
+  ean              String?            @unique
   business         Business           @relation(fields: [businessId], references: [id])
   businessId       Int
+  supplier         Supplier           @relation(fields: [supplierId], references: [id])
+  supplierId       Int
   InventoryProduct InventoryProduct[]
+
+  @@unique([sku, businessId])
 }
 
 model Inventory {

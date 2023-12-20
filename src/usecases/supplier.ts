@@ -100,7 +100,7 @@ export const createSupplierService = ({
     }
 
     const supplier = await supplierRepository.findByCode(supplierCode)
-    if (!supplier) {
+    if (!supplier || supplier.businessId !== authUser.businessId) {
       throw new ServiceError('Supplier not found', 404)
     }
 
@@ -145,7 +145,7 @@ export const createSupplierService = ({
     }
 
     const supplier = await supplierRepository.findByCode(supplierCode)
-    if (!supplier || supplier.business.id !== authUser.businessId) {
+    if (!supplier || supplier.businessId !== authUser.businessId) {
       throw new ServiceError('Supplier not found', 404)
     }
 

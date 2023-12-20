@@ -51,7 +51,7 @@ export const createInventoryProductService = ({
       throw new ServiceError('Product not found', 404)
     }
 
-    if (product.business.id !== user.business.id) {
+    if (product.businessId !== user.business.id) {
       throw new ServiceError('Product does not belong to user business', 403)
     }
 

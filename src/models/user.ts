@@ -12,18 +12,18 @@ export type User = {
   email: string
   password: string
   role: Role
+  businessId: number
   createdAt: Date
   updatedAt: Date
 }
 
 export type UserWithBusiness = User & {
   business: Business
-  businessId: number
 }
 
 export type SafeUser = Omit<
   User,
-  'id' | 'password' | 'role' | 'createdAt' | 'updatedAt'
+  'id' | 'password' | 'role' | 'businessId' | 'createdAt' | 'updatedAt'
 >
 
 export type SafeUserWithBusiness = SafeUser & {
