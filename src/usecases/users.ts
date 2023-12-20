@@ -86,7 +86,7 @@ type UserServiceParams = {
 const generateAccessToken = (user: User) => {
   const data = safeUser(user)
   return jwt.sign(data, process.env.ACCESS_TOKEN_SECRET as string, {
-    expiresIn: '60 days',
+    expiresIn: '30 days',
   })
 }
 
