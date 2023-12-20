@@ -16,6 +16,9 @@ export const createProductRepository = (): ProductRepository => ({
       where: {sku},
     })
   },
+  findByEAN: async (ean: string) => {
+    return await prisma.product.findUnique({where: {ean}})
+  },
   findByBusinessIdAndSKU: async (businessId: number, sku: string) => {
     return await prisma.product.findFirst({where: {businessId, sku}})
   },

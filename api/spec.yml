@@ -738,10 +738,17 @@ paths:
           description: SKU already in use
           content:
             application/json:
-              example:
-                success: false
-                error:
-                  message: SKU already in use
+              examples:
+                SkuInUse:
+                  value:
+                    success: false
+                    error:
+                      message: SKU already in use
+                EanInUse:
+                  value:
+                    success: false
+                    error:
+                      message: EAN already in use
     get:
       parameters:
         - in: header

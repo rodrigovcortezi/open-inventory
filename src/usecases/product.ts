@@ -71,6 +71,15 @@ export const createProductService = ({
       throw new ServiceError('Supplier not found', 404)
     }
 
+    if (productData.ean) {
+      const productExists = Boolean(
+        await productRepository.findByEAN(productData.ean),
+      )
+      if (productExists) {
+        throw new ServiceError('EAN is already in use', 422)
+      }
+    }
+
     const productExists = Boolean(
       await productRepository.findByBusinessIdAndSKU(
         authUser.businessId,
