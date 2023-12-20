@@ -10,6 +10,7 @@ import {
   PartialUserSchema,
 } from '~/server/schemas/user'
 import {authenticate} from '../middlewares/authenticate'
+import {PartialBusinessSchema} from '../schemas/business'
 
 type UserRouterParams = {
   service: UserService
@@ -22,6 +23,7 @@ export const createUserRouter = ({service}: UserRouterParams) => {
     addStoreUser,
     addSupplierUser,
     updateUser,
+    updateUserBusiness,
     loginUser,
   } = createUserController({
     service,
@@ -49,6 +51,12 @@ export const createUserRouter = ({service}: UserRouterParams) => {
   )
   router.put('/users/me', validate(PartialUserSchema), authenticate, updateUser)
   router.post('/users/login', validate(LoginUserSchema), loginUser)
+  router.put(
+    '/users/me/business',
+    validate(PartialBusinessSchema),
+    authenticate,
+    updateUserBusiness,
+  )
 
   return router
 }

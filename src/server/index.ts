@@ -4,7 +4,6 @@ import cors from '@koa/cors'
 import {createRouter} from '~/server/routes'
 import {error as errorMiddleware} from '~/server/middlewares/error'
 import type {UserService} from './controllers/user'
-import type {BusinessService} from './controllers/business'
 import type {SupplierService} from './controllers/supplier'
 import type {ProductService} from './controllers/product'
 import type {InventoryService} from './controllers/inventory'
@@ -15,7 +14,6 @@ type ServerParams = {
     port?: number
   }
   userService: UserService
-  businessService: BusinessService
   supplierService: SupplierService
   productService: ProductService
   inventoryService: InventoryService
@@ -25,7 +23,6 @@ type ServerParams = {
 export const createServer = ({
   config: {port = 3000} = {},
   userService,
-  businessService,
   supplierService,
   productService,
   inventoryService,
@@ -40,7 +37,6 @@ export const createServer = ({
 
   const router = createRouter({
     userService,
-    businessService,
     supplierService,
     productService,
     inventoryService,

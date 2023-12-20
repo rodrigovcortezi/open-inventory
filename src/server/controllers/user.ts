@@ -5,6 +5,7 @@ import type {
   AddSupplierUserUseCase,
   LoginUserUseCase,
   RegisterUserUseCase,
+  UpdateUserBusinessUseCase,
   UpdateUserUseCase,
 } from '~/usecases/users'
 import {buildResponse} from '../response'
@@ -17,6 +18,7 @@ export type UserService = {
   addSupplierUser: AddSupplierUserUseCase
   loginUser: LoginUserUseCase
   updateUser: UpdateUserUseCase
+  updateUserBusiness: UpdateUserBusinessUseCase
 }
 
 type UserControllerParams = {
@@ -70,6 +72,14 @@ export const createUserController = ({service}: UserControllerParams) => {
     ctx.body = buildResponse({data: user})
   }
 
+  const updateUserBusiness = async (ctx: UserContext) => {
+    const business = await service.updateUserBusiness(
+      ctx.request.body,
+      ctx.user?.email as string,
+    )
+    ctx.body = buildResponse({data: business})
+  }
+
   return {
     createUser,
     addAdminUser,
@@ -77,5 +87,6 @@ export const createUserController = ({service}: UserControllerParams) => {
     addSupplierUser,
     loginUser,
     updateUser,
+    updateUserBusiness,
   }
 }

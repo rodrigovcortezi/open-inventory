@@ -6,6 +6,7 @@ import {Role, safeUser, safeUserWithBusiness, type User} from '~/models/user'
 import type {BusinessRepository} from '~/repository/business'
 import type {SafeUser, UserWithBusiness} from '~/models/user'
 import type {SupplierRepository} from '~/repository/supplier'
+import {safeBusiness, type SafeBusiness} from '~/models/business'
 
 type UserWithToken = SafeUser & {token: string}
 
@@ -49,6 +50,11 @@ type UpdateUserDTO = {
   password?: string
 }
 
+type UpdateUserBusinessDTO = {
+  name?: string
+  cnpj?: string
+}
+
 export type RegisterUserUseCase = (
   userData: RegisterUserDTO,
 ) => Promise<SafeUser>
@@ -76,6 +82,11 @@ export type UpdateUserUseCase = (
   userData: UpdateUserDTO,
   loggedUserEmail: string,
 ) => Promise<SafeUser>
+
+export type UpdateUserBusinessUseCase = (
+  businessData: UpdateUserBusinessDTO,
+  loggedUserEmail: string,
+) => Promise<SafeBusiness>
 
 type UserServiceParams = {
   userRepository: UserRepository
@@ -236,5 +247,34 @@ export const createUserService = ({
 
     const user = await userRepository.update(authUser.id, userData)
     return safeUserWithBusiness(user)
+  },
+
+  updateUserBusiness: async (
+    businessData: UpdateUserBusinessDTO,
+    loggedUserEmail: string,
+  ) => {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
+      throw new ServiceError('User not found', 404)
+    }
+
+    if (authUser.role != Role.ADMIN) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    if (businessData.cnpj) {
+      const businessExists = Boolean(
+        await businessRepository.findByCNPJ(businessData.cnpj),
+      )
+      if (businessExists) {
+        throw new ServiceError('CNPJ is already in use', 422)
+      }
+    }
+
+    const business = await businessRepository.update(
+      authUser.business.id,
+      businessData,
+    )
+    return safeBusiness(business)
   },
 })
