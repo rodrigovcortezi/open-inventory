@@ -21,9 +21,20 @@ type RegisterSupplierDTO = {
   cnpj: string
 }
 
+type UpdateSupplierDTO = {
+  name?: string
+  cnpj?: string
+}
+
 export type RegisterSupplierUseCase = (
   loggedUserEmail: string,
   supplierData: RegisterSupplierDTO,
+) => Promise<SafeSupplierWithBusiness>
+
+export type UpdateSupplierUseCase = (
+  loggedUserEmail: string,
+  supplierCode: string,
+  supplierData: UpdateSupplierDTO,
 ) => Promise<SafeSupplierWithBusiness>
 
 export type GetAllBusinessSuppliersUseCase = (
@@ -74,6 +85,40 @@ export const createSupplierService = ({
       businessId: authUser.business.id as number,
     })
     return safeSupplierWithBusiness(supplier)
+  },
+  updateSupplier: async (
+    loggedUserEmail: string,
+    supplierCode: string,
+    supplierData: UpdateSupplierDTO,
+  ) => {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
+      throw new ServiceError('User not found', 404)
+    }
+
+    if (authUser.role !== Role.ADMIN) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    const supplier = await supplierRepository.findByCode(supplierCode)
+    if (!supplier) {
+      throw new ServiceError('Supplier not found', 404)
+    }
+
+    if (supplierData.cnpj && supplierData.cnpj !== supplier.cnpj) {
+      const supplierExists = Boolean(
+        await supplierRepository.findByCNPJ(supplierData.cnpj),
+      )
+      if (supplierExists) {
+        throw new ServiceError('CNPJ is already in use', 422)
+      }
+    }
+
+    const changedSupplier = await supplierRepository.update(
+      supplierCode,
+      supplierData,
+    )
+    return safeSupplierWithBusiness(changedSupplier)
   },
   getAllBusinessSuppliers: async (loggedUserEmail: string) => {
     const authUser = await userRepository.findByEmail(loggedUserEmail)

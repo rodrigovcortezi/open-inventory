@@ -1,7 +1,8 @@
-import {
+import type {
   DeleteSupplierUseCase,
   GetAllBusinessSuppliersUseCase,
   RegisterSupplierUseCase,
+  UpdateSupplierUseCase,
 } from '~/usecases/supplier'
 import {buildResponse} from '../response'
 import type {UserContext} from '../middlewares/authenticate'
@@ -9,6 +10,7 @@ import {ControllerError} from './error'
 
 export type SupplierService = {
   registerSupplier: RegisterSupplierUseCase
+  updateSupplier: UpdateSupplierUseCase
   getAllBusinessSuppliers: GetAllBusinessSuppliersUseCase
   deleteSupplier: DeleteSupplierUseCase
 }
@@ -23,6 +25,17 @@ export const createSupplierController = ({
   const registerSupplier = async (ctx: UserContext) => {
     const supplier = await service.registerSupplier(
       ctx.user?.email as string,
+      ctx.request.body,
+    )
+    ctx.body = buildResponse({data: supplier})
+    ctx.status = 201
+  }
+
+  const updateSupplier = async (ctx: UserContext) => {
+    const {supplierCode} = ctx.params
+    const supplier = await service.updateSupplier(
+      ctx.user?.email as string,
+      supplierCode,
       ctx.request.body,
     )
     ctx.body = buildResponse({data: supplier})
@@ -48,5 +61,5 @@ export const createSupplierController = ({
     ctx.body = buildResponse({data: supplier})
   }
 
-  return {registerSupplier, findAll, deleteSupplier}
+  return {registerSupplier, updateSupplier, findAll, deleteSupplier}
 }
