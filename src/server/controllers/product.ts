@@ -1,5 +1,6 @@
 import type {
   DeleteProductUseCase,
+  GetAllProductsUseCase,
   RegisterProductUseCase,
   UpdateProductUseCase,
 } from '~/usecases/product'
@@ -9,6 +10,7 @@ import {ControllerError} from './error'
 
 export type ProductService = {
   registerProduct: RegisterProductUseCase
+  getAllProducts: GetAllProductsUseCase
   updateProduct: UpdateProductUseCase
   deleteProduct: DeleteProductUseCase
 }
@@ -24,6 +26,12 @@ export const createProductController = ({service}: ProductControllerParams) => {
       ctx.request.body,
     )
     ctx.body = buildResponse({data: product})
+    ctx.status = 201
+  }
+
+  const findAllProducts = async (ctx: UserContext) => {
+    const products = await service.getAllProducts(ctx.user?.email as string)
+    ctx.body = buildResponse({data: {products}})
   }
 
   const updateProduct = async (ctx: UserContext) => {
@@ -53,5 +61,5 @@ export const createProductController = ({service}: ProductControllerParams) => {
     ctx.body = buildResponse({data: product})
   }
 
-  return {registerProduct, updateProduct, deleteProduct}
+  return {registerProduct, findAllProducts, updateProduct, deleteProduct}
 }

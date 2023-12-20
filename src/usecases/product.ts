@@ -35,6 +35,10 @@ export type RegisterProductUseCase = (
   productData: RegisterProductDTO,
 ) => Promise<SafeProductWithSupplierCode>
 
+export type GetAllProductsUseCase = (
+  loggedUserEmail: string,
+) => Promise<SafeProductWithSupplierCode[]>
+
 export type UpdateProductUseCase = (
   loggedUserEmail: string,
   id: number,
@@ -100,6 +104,24 @@ export const createProductService = ({
     })
 
     return {...safeProduct(product), supplierCode: supplier.code}
+  },
+  getAllProducts: async (loggedUserEmail: string) => {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
+      throw new ServiceError('User not found', 404)
+    }
+
+    if (authUser.role !== Role.ADMIN) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    const products = await productRepository.findByBusinessId(
+      authUser.businessId,
+    )
+    return products.map(p => ({
+      ...safeProduct(p),
+      supplierCode: p.supplier.code,
+    }))
   },
   updateProduct: async (
     loggedUserEmail: string,
