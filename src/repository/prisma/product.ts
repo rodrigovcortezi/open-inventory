@@ -26,7 +26,10 @@ export const createProductRepository = (): ProductRepository => ({
     })
   },
   findByBusinessIdAndSKU: async (businessId: number, sku: string) => {
-    return await prisma.product.findFirst({where: {businessId, sku}})
+    return await prisma.product.findFirst({
+      where: {businessId, sku},
+      include: {supplier: true},
+    })
   },
   create: async (data: CreateProductDTO) => {
     return await prisma.product.create({data})
@@ -35,6 +38,7 @@ export const createProductRepository = (): ProductRepository => ({
     return await prisma.product.update({
       where: {id},
       data,
+      include: {supplier: true},
     })
   },
   delete: async (id: number) => {

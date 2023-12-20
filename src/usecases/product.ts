@@ -28,6 +28,7 @@ type UpdateProductDTO = {
   description?: string
   sku?: string
   ean?: string
+  supplierCode?: string
 }
 
 export type RegisterProductUseCase = (
@@ -41,9 +42,9 @@ export type GetAllProductsUseCase = (
 
 export type UpdateProductUseCase = (
   loggedUserEmail: string,
-  id: number,
+  sku: string,
   productData: UpdateProductDTO,
-) => Promise<Product>
+) => Promise<SafeProductWithSupplierCode>
 
 export type DeleteProductUseCase = (
   loggedUserEmail: string,
@@ -125,26 +126,73 @@ export const createProductService = ({
   },
   updateProduct: async (
     loggedUserEmail: string,
-    id: number,
+    sku: string,
     productData: UpdateProductDTO,
   ) => {
-    const user = await userRepository.findByEmail(loggedUserEmail)
-    if (!user) {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
       throw new ServiceError('User not found', 404)
     }
 
-    const product = await productRepository.findById(id)
+    if (authUser.role !== Role.ADMIN) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    const product = await productRepository.findByBusinessIdAndSKU(
+      authUser.businessId,
+      sku,
+    )
     if (!product) {
       throw new ServiceError('Product not found', 404)
     }
 
-    if (user.business.id !== product.businessId) {
-      throw new ServiceError('Product does not belong to user business', 403)
+    if (productData.sku && productData.sku !== product.sku) {
+      const productExists = Boolean(
+        await productRepository.findByBusinessIdAndSKU(
+          authUser.businessId,
+          product.sku,
+        ),
+      )
+      if (productExists) {
+        throw new ServiceError('SKU is already in use', 422)
+      }
     }
 
-    const changedProduct = await productRepository.update(id, productData)
+    if (productData.ean && productData.ean !== product.ean) {
+      const productExists = Boolean(
+        await productRepository.findByEAN(productData.ean),
+      )
+      if (productExists) {
+        throw new ServiceError('EAN is already in use', 422)
+      }
+    }
 
-    return changedProduct
+    let supplierId
+    if (
+      productData.supplierCode &&
+      productData.supplierCode !== product.supplier.code
+    ) {
+      const supplier = await supplierRepository.findByCode(
+        productData.supplierCode,
+      )
+      if (!supplier) {
+        throw new ServiceError('Supplier not found', 404)
+      }
+      supplierId = supplier.id
+    }
+
+    const changedProduct = await productRepository.update(product.id, {
+      name: productData.name,
+      description: productData.description,
+      sku: productData.sku,
+      ean: productData.ean,
+      supplierId: supplierId,
+    })
+
+    return {
+      ...safeProduct(changedProduct),
+      supplierCode: changedProduct.supplier.code,
+    }
   },
   deleteProduct: async (loggedUserEmail: string, id: number) => {
     const user = await userRepository.findByEmail(loggedUserEmail)

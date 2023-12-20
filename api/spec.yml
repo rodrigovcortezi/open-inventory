@@ -734,6 +734,14 @@ paths:
                 success: false
                 error:
                   message: User not allowed
+        404:
+          description: Supplier not found
+          content:
+            application/json:
+              example:
+                success: false
+                error:
+                  message: Supplier not found
         422:
           description: SKU already in use
           content:
@@ -862,18 +870,32 @@ paths:
           description: Product not found
           content:
             application/json:
-              example:
-                success: false
-                error:
-                  message: Product not found
+              examples:
+                productNotFound:
+                  value:
+                    success: false
+                    error:
+                      message: Product not found
+                supplierNotFound:
+                  value:
+                    success: false
+                    error:
+                      message: Supplier not found
         422:
           description: SKU already in use
           content:
             application/json:
-              example:
-                success: false
-                error:
-                  message: SKU already in use
+              examples:
+                SkuInUse:
+                  value:
+                    success: false
+                    error:
+                      message: SKU already in use
+                EanInUse:
+                  value:
+                    success: false
+                    error:
+                      message: EAN already in use
     delete:
       parameters:
         - in: header

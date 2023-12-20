@@ -14,6 +14,7 @@ export type UpdateProductDTO = {
   description?: string
   sku?: string
   ean?: string
+  supplierId?: number
 }
 
 export interface ProductRepository {
@@ -24,8 +25,8 @@ export interface ProductRepository {
   findByBusinessIdAndSKU: (
     businessId: number,
     sku: string,
-  ) => Promise<Product | null>
+  ) => Promise<ProductWithSupplier | null>
   create: (data: CreateProductDTO) => Promise<Product>
-  update: (id: number, data: UpdateProductDTO) => Promise<Product>
+  update: (id: number, data: UpdateProductDTO) => Promise<ProductWithSupplier>
   delete: (id: number) => Promise<Product>
 }

@@ -21,7 +21,12 @@ export const createProductRouter = ({service}: ProductRouterParams) => {
   const router = new Router({prefix: '/products'})
   router.post('/', validate(CreateProductSchema), authenticate, registerProduct)
   router.get('/', authenticate, findAllProducts)
-  router.put('/:id', validate(UpdateProductSchema), authenticate, updateProduct)
+  router.put(
+    '/:productSku',
+    validate(UpdateProductSchema),
+    authenticate,
+    updateProduct,
+  )
   router.delete('/:id', authenticate, deleteProduct)
 
   return router

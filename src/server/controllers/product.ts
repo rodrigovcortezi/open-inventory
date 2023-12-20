@@ -35,14 +35,10 @@ export const createProductController = ({service}: ProductControllerParams) => {
   }
 
   const updateProduct = async (ctx: UserContext) => {
-    const productId = parseInt(ctx.params.id)
-    if (isNaN(productId)) {
-      throw new ControllerError('Invalid param')
-    }
-
+    const {productSku} = ctx.params
     const product = await service.updateProduct(
       ctx.user?.email as string,
-      productId,
+      productSku,
       ctx.request.body,
     )
     ctx.body = buildResponse({data: product})
