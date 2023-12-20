@@ -1,7 +1,9 @@
 import {
+  type SafeSupplier,
   safeSupplierWithBusiness,
   type SafeSupplierWithBusiness,
   type Supplier,
+  safeSupplier,
 } from '~/models/supplier'
 import {SupplierRepository} from '~/repository/supplier'
 import {UniqueCharOTP} from 'unique-string-generator'
@@ -23,6 +25,10 @@ export type RegisterSupplierUseCase = (
   loggedUserEmail: string,
   supplierData: RegisterSupplierDTO,
 ) => Promise<SafeSupplierWithBusiness>
+
+export type GetAllBusinessSuppliersUseCase = (
+  loggedUserEmail: string,
+) => Promise<SafeSupplier[]>
 
 export type DeleteSupplierUseCase = (
   loggedUserEmail: string,
@@ -68,6 +74,21 @@ export const createSupplierService = ({
       businessId: authUser.business.id as number,
     })
     return safeSupplierWithBusiness(supplier)
+  },
+  getAllBusinessSuppliers: async (loggedUserEmail: string) => {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
+      throw new ServiceError('User not found', 404)
+    }
+
+    if (authUser.role !== Role.ADMIN) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    const suppliers = await supplierRepository.findByBusinessId(
+      authUser.businessId,
+    )
+    return suppliers.map(s => safeSupplier(s))
   },
   deleteSupplier: async (loggedUserEmail: string, id: number) => {
     const user = await userRepository.findByEmail(loggedUserEmail)

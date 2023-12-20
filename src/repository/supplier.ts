@@ -1,4 +1,4 @@
-import type {SupplierWithBusiness} from '~/models/supplier'
+import type {Supplier, SupplierWithBusiness} from '~/models/supplier'
 
 export type CreateSupplierDTO = {
   name: string
@@ -8,6 +8,7 @@ export type CreateSupplierDTO = {
 }
 
 export interface SupplierRepository {
+  findByBusinessId: (businessId: number) => Promise<Supplier[]>
   findById: (id: number) => Promise<SupplierWithBusiness | null>
   findByCode: (code: string) => Promise<SupplierWithBusiness | null>
   findByCNPJ: (cnpj: string) => Promise<SupplierWithBusiness | null>

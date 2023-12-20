@@ -1,5 +1,6 @@
 import {
   DeleteSupplierUseCase,
+  GetAllBusinessSuppliersUseCase,
   RegisterSupplierUseCase,
 } from '~/usecases/supplier'
 import {buildResponse} from '../response'
@@ -8,6 +9,7 @@ import {ControllerError} from './error'
 
 export type SupplierService = {
   registerSupplier: RegisterSupplierUseCase
+  getAllBusinessSuppliers: GetAllBusinessSuppliersUseCase
   deleteSupplier: DeleteSupplierUseCase
 }
 
@@ -26,6 +28,13 @@ export const createSupplierController = ({
     ctx.body = buildResponse({data: supplier})
   }
 
+  const findAll = async (ctx: UserContext) => {
+    const suppliers = await service.getAllBusinessSuppliers(
+      ctx.user?.email as string,
+    )
+    ctx.body = buildResponse({data: {suppliers}})
+  }
+
   const deleteSupplier = async (ctx: UserContext) => {
     const supplierId = parseInt(ctx.params.id)
     if (isNaN(supplierId)) {
@@ -39,5 +48,5 @@ export const createSupplierController = ({
     ctx.body = buildResponse({data: supplier})
   }
 
-  return {registerSupplier, deleteSupplier}
+  return {registerSupplier, findAll, deleteSupplier}
 }

@@ -2,6 +2,10 @@ import {prisma} from '.'
 import type {CreateSupplierDTO, SupplierRepository} from '../supplier'
 
 export const createSupplierRepository = (): SupplierRepository => ({
+  findByBusinessId: async (businessId: number) => {
+    return await prisma.supplier.findMany({where: {businessId}})
+  },
+
   findById: async (id: number) => {
     return await prisma.supplier.findUnique({
       where: {id},

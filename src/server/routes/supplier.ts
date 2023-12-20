@@ -12,7 +12,9 @@ type SupplierRouterParams = {
 }
 
 export const createSupplierRouter = ({service}: SupplierRouterParams) => {
-  const {registerSupplier, deleteSupplier} = createSupplierController({service})
+  const {registerSupplier, findAll, deleteSupplier} = createSupplierController({
+    service,
+  })
   const router = new Router({prefix: '/suppliers'})
   router.post(
     '/',
@@ -20,6 +22,7 @@ export const createSupplierRouter = ({service}: SupplierRouterParams) => {
     authenticate,
     registerSupplier,
   )
+  router.get('/', authenticate, findAll)
   router.delete('/:id', authenticate, deleteSupplier)
 
   return router
