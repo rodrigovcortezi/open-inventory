@@ -11,7 +11,9 @@ export const UserSchema = z.object({
 
 export const CreateUserSchema = UserSchema.merge(HasPassword)
 
-export const PartialUserSchema = UserSchema.partial().omit({business: true})
+export const PartialUserSchema = CreateUserSchema.partial().omit({
+  business: true,
+})
 
 export const LoginUserSchema = UserSchema.merge(HasPassword).omit({
   name: true,

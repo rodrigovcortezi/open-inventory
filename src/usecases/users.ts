@@ -46,6 +46,7 @@ type LoginUserDTO = {
 type UpdateUserDTO = {
   name?: string
   email?: string
+  password?: string
 }
 
 export type RegisterUserUseCase = (
@@ -72,7 +73,6 @@ export type LoginUserUseCase = (
 ) => Promise<UserWithToken>
 
 export type UpdateUserUseCase = (
-  id: number,
   userData: UpdateUserDTO,
   loggedUserEmail: string,
 ) => Promise<SafeUser>
@@ -214,21 +214,18 @@ export const createUserService = ({
     }
   },
 
-  updateUser: async (
-    id: number,
-    userData: UpdateUserDTO,
-    loggedUserEmail: string,
-  ) => {
-    const userExists = await userRepository.findByID(id)
-    if (!userExists) {
+  updateUser: async (userData: UpdateUserDTO, loggedUserEmail: string) => {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
       throw new ServiceError('User not found', 404)
     }
 
-    if (loggedUserEmail !== userExists.email) {
-      throw new ServiceError('Logged user cannot update other user', 403)
+    if (userData.password) {
+      const passwordHash = await bcrypt.hash(userData.password, 10)
+      userData.password = passwordHash
     }
 
-    const user = await userRepository.update(id, userData)
+    const user = await userRepository.update(authUser.id, userData)
     return safeUserWithBusiness(user)
   },
 })

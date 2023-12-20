@@ -47,12 +47,7 @@ export const createUserRouter = ({service}: UserRouterParams) => {
     authenticate,
     addSupplierUser,
   )
-  router.put(
-    '/users/:id',
-    validate(PartialUserSchema),
-    authenticate,
-    updateUser,
-  )
+  router.put('/users/me', validate(PartialUserSchema), authenticate, updateUser)
   router.post('/users/login', validate(LoginUserSchema), loginUser)
 
   return router

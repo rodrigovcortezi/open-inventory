@@ -7,7 +7,6 @@ import type {
   RegisterUserUseCase,
   UpdateUserUseCase,
 } from '~/usecases/users'
-import {ControllerError} from './error'
 import {buildResponse} from '../response'
 import {UserContext} from '../middlewares/authenticate'
 
@@ -64,13 +63,7 @@ export const createUserController = ({service}: UserControllerParams) => {
   }
 
   const updateUser = async (ctx: UserContext) => {
-    const userId = parseInt(ctx.params.id)
-    if (isNaN(userId)) {
-      throw new ControllerError('Invalid param')
-    }
-
     const user = await service.updateUser(
-      userId,
       ctx.request.body,
       ctx.user?.email as string,
     )
