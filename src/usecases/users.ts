@@ -225,6 +225,15 @@ export const createUserService = ({
       userData.password = passwordHash
     }
 
+    if (userData.email) {
+      const userExists = Boolean(
+        await userRepository.findByEmail(userData.email),
+      )
+      if (userExists) {
+        throw new ServiceError('Email is already in use', 422)
+      }
+    }
+
     const user = await userRepository.update(authUser.id, userData)
     return safeUserWithBusiness(user)
   },
