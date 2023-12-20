@@ -132,7 +132,7 @@ export const createUserService = ({
     const authUser = (await userRepository.findByEmail(
       loggedUserEmail,
     )) as UserWithBusiness
-    if (authUser.role != Role.ADMIN) {
+    if (authUser.role !== Role.ADMIN) {
       throw new ServiceError('User not allowed', 403)
     }
 
@@ -156,7 +156,7 @@ export const createUserService = ({
     const authUser = (await userRepository.findByEmail(
       loggedUserEmail,
     )) as UserWithBusiness
-    if (authUser.role != Role.ADMIN) {
+    if (authUser.role !== Role.ADMIN) {
       throw new ServiceError('User not allowed', 403)
     }
 
@@ -183,7 +183,7 @@ export const createUserService = ({
     const authUser = (await userRepository.findByEmail(
       loggedUserEmail,
     )) as UserWithBusiness
-    if (authUser.role != Role.ADMIN) {
+    if (authUser.role !== Role.ADMIN) {
       throw new ServiceError('User not allowed', 403)
     }
 
@@ -258,7 +258,7 @@ export const createUserService = ({
       throw new ServiceError('User not found', 404)
     }
 
-    if (authUser.role != Role.ADMIN) {
+    if (authUser.role !== Role.ADMIN) {
       throw new ServiceError('User not allowed', 403)
     }
 

@@ -15,9 +15,18 @@ export const createSupplierRepository = (): SupplierRepository => ({
       include: {business: true},
     })
   },
+
+  findByCNPJ: async (cnpj: string) => {
+    return await prisma.supplier.findUnique({
+      where: {cnpj},
+      include: {business: true},
+    })
+  },
+
   create: async (data: CreateSupplierDTO) => {
     return await prisma.supplier.create({data, include: {business: true}})
   },
+
   delete: async (id: number) => {
     return await prisma.supplier.delete({
       where: {id},

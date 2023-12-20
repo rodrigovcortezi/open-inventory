@@ -1,8 +1,13 @@
-import {Supplier} from '~/models/supplier'
+import {
+  safeSupplierWithBusiness,
+  type SafeSupplierWithBusiness,
+  type Supplier,
+} from '~/models/supplier'
 import {SupplierRepository} from '~/repository/supplier'
 import {UniqueCharOTP} from 'unique-string-generator'
 import {UserRepository} from '~/repository/user'
 import {ServiceError} from './error'
+import {Role} from '~/models/user'
 
 type SupplierServiceParams = {
   userRepository: UserRepository
@@ -11,12 +16,13 @@ type SupplierServiceParams = {
 
 type RegisterSupplierDTO = {
   name: string
+  cnpj: string
 }
 
 export type RegisterSupplierUseCase = (
   loggedUserEmail: string,
   supplierData: RegisterSupplierDTO,
-) => Promise<Supplier>
+) => Promise<SafeSupplierWithBusiness>
 
 export type DeleteSupplierUseCase = (
   loggedUserEmail: string,
@@ -31,17 +37,37 @@ export const createSupplierService = ({
     loggedUserEmail: string,
     supplierData: RegisterSupplierDTO,
   ) => {
-    const user = await userRepository.findByEmail(loggedUserEmail)
-    if (!user) {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
       throw new ServiceError('User not found.', 404)
+    }
+
+    if (authUser.role !== Role.ADMIN) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    const supplierExists = Boolean(
+      await supplierRepository.findByCNPJ(supplierData.cnpj),
+    )
+    if (supplierExists) {
+      throw new ServiceError('CNPJ is already in use', 422)
+    }
+
+    let supplierCode = null
+    while (supplierCode === null) {
+      const code = UniqueCharOTP(5)
+      const supplierExists = Boolean(await supplierRepository.findByCode(code))
+      if (!supplierExists) {
+        supplierCode = code
+      }
     }
 
     const supplier = await supplierRepository.create({
       ...supplierData,
-      code: UniqueCharOTP(5),
-      businessId: user.business.id as number,
+      code: supplierCode,
+      businessId: authUser.business.id as number,
     })
-    return supplier
+    return safeSupplierWithBusiness(supplier)
   },
   deleteSupplier: async (loggedUserEmail: string, id: number) => {
     const user = await userRepository.findByEmail(loggedUserEmail)
