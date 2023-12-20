@@ -6,16 +6,6 @@ import type {
 } from '../product'
 
 export const createProductRepository = (): ProductRepository => ({
-  findById: async (id: number) => {
-    return await prisma.product.findUnique({
-      where: {id},
-    })
-  },
-  findBySku: async (sku: string) => {
-    return await prisma.product.findFirst({
-      where: {sku},
-    })
-  },
   findByEAN: async (ean: string) => {
     return await prisma.product.findUnique({where: {ean}})
   },

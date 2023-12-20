@@ -27,7 +27,7 @@ export const createProductRouter = ({service}: ProductRouterParams) => {
     authenticate,
     updateProduct,
   )
-  router.delete('/:id', authenticate, deleteProduct)
+  router.delete('/:productSku', authenticate, deleteProduct)
 
   return router
 }

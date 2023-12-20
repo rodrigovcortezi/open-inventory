@@ -46,7 +46,10 @@ export const createInventoryProductService = ({
     }
 
     const {productSku} = data
-    const product = await productRepository.findBySku(productSku)
+    const product = await productRepository.findByBusinessIdAndSKU(
+      user.businessId,
+      productSku,
+    )
     if (!product) {
       throw new ServiceError('Product not found', 404)
     }

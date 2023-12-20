@@ -6,7 +6,6 @@ import type {
 } from '~/usecases/product'
 import {UserContext} from '~/server/middlewares/authenticate'
 import {buildResponse} from '~/server/response'
-import {ControllerError} from './error'
 
 export type ProductService = {
   registerProduct: RegisterProductUseCase
@@ -45,14 +44,11 @@ export const createProductController = ({service}: ProductControllerParams) => {
   }
 
   const deleteProduct = async (ctx: UserContext) => {
-    const productId = parseInt(ctx.params.id)
-    if (isNaN(productId)) {
-      throw new ControllerError('Invalid param')
-    }
+    const {productSku} = ctx.params
 
     const product = await service.deleteProduct(
       ctx.user?.email as string,
-      productId,
+      productSku,
     )
     ctx.body = buildResponse({data: product})
   }

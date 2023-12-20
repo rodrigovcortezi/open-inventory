@@ -18,8 +18,6 @@ export type UpdateProductDTO = {
 }
 
 export interface ProductRepository {
-  findById: (id: number) => Promise<Product | null>
-  findBySku: (sku: string) => Promise<Product | null>
   findByEAN: (ean: string) => Promise<Product | null>
   findByBusinessId: (businessId: number) => Promise<ProductWithSupplier[]>
   findByBusinessIdAndSKU: (

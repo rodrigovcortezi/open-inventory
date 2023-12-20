@@ -1,8 +1,4 @@
-import {
-  safeProduct,
-  type Product,
-  type SafeProductWithSupplierCode,
-} from '~/models/product'
+import {safeProduct, type SafeProductWithSupplierCode} from '~/models/product'
 import type {ProductRepository} from '~/repository/product'
 import type {UserRepository} from '~/repository/user'
 import {ServiceError} from './error'
@@ -48,8 +44,8 @@ export type UpdateProductUseCase = (
 
 export type DeleteProductUseCase = (
   loggedUserEmail: string,
-  id: number,
-) => Promise<Product>
+  sku: string,
+) => Promise<SafeProductWithSupplierCode>
 
 export const createProductService = ({
   userRepository,
@@ -194,23 +190,26 @@ export const createProductService = ({
       supplierCode: changedProduct.supplier.code,
     }
   },
-  deleteProduct: async (loggedUserEmail: string, id: number) => {
-    const user = await userRepository.findByEmail(loggedUserEmail)
-    if (!user) {
+  deleteProduct: async (loggedUserEmail: string, sku: string) => {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
       throw new ServiceError('User not found', 404)
     }
 
-    const product = await productRepository.findById(id)
+    if (authUser.role !== Role.ADMIN) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    const product = await productRepository.findByBusinessIdAndSKU(
+      authUser.businessId,
+      sku,
+    )
     if (!product) {
       throw new ServiceError('Product not found', 404)
     }
 
-    if (user.business.id !== product.businessId) {
-      throw new ServiceError('Product does not belong to user business', 403)
-    }
+    await productRepository.delete(product.id)
 
-    await productRepository.delete(id)
-
-    return product
+    return {...safeProduct(product), supplierCode: product.supplier.code}
   },
 })
