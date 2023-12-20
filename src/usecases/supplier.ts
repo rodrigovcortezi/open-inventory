@@ -2,7 +2,6 @@ import {
   type SafeSupplier,
   safeSupplierWithBusiness,
   type SafeSupplierWithBusiness,
-  type Supplier,
   safeSupplier,
 } from '~/models/supplier'
 import {SupplierRepository} from '~/repository/supplier'
@@ -43,8 +42,8 @@ export type GetAllBusinessSuppliersUseCase = (
 
 export type DeleteSupplierUseCase = (
   loggedUserEmail: string,
-  id: number,
-) => Promise<Supplier>
+  supplierCode: string,
+) => Promise<SafeSupplierWithBusiness>
 
 export const createSupplierService = ({
   userRepository,
@@ -135,23 +134,22 @@ export const createSupplierService = ({
     )
     return suppliers.map(s => safeSupplier(s))
   },
-  deleteSupplier: async (loggedUserEmail: string, id: number) => {
-    const user = await userRepository.findByEmail(loggedUserEmail)
-    if (!user) {
+  deleteSupplier: async (loggedUserEmail: string, supplierCode: string) => {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
       throw new ServiceError('User not found.', 404)
     }
 
-    const supplier = await supplierRepository.findById(id)
-    if (!supplier) {
+    if (authUser.role !== Role.ADMIN) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    const supplier = await supplierRepository.findByCode(supplierCode)
+    if (!supplier || supplier.business.id !== authUser.businessId) {
       throw new ServiceError('Supplier not found', 404)
     }
 
-    if (user.business.id !== supplier.business.id) {
-      throw new ServiceError('Supplier belongs to other business', 403)
-    }
-
-    await supplierRepository.delete(id)
-
-    return supplier
+    await supplierRepository.delete(supplier.id)
+    return safeSupplierWithBusiness(supplier)
   },
 })

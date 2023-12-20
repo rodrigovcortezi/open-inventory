@@ -33,7 +33,7 @@ export const createSupplierRouter = ({service}: SupplierRouterParams) => {
     authenticate,
     updateSupplier,
   )
-  router.delete('/:id', authenticate, deleteSupplier)
+  router.delete('/:supplierCode', authenticate, deleteSupplier)
 
   return router
 }

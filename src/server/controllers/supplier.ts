@@ -6,7 +6,6 @@ import type {
 } from '~/usecases/supplier'
 import {buildResponse} from '../response'
 import type {UserContext} from '../middlewares/authenticate'
-import {ControllerError} from './error'
 
 export type SupplierService = {
   registerSupplier: RegisterSupplierUseCase
@@ -49,14 +48,10 @@ export const createSupplierController = ({
   }
 
   const deleteSupplier = async (ctx: UserContext) => {
-    const supplierId = parseInt(ctx.params.id)
-    if (isNaN(supplierId)) {
-      throw new ControllerError('Invalid param')
-    }
-
+    const {supplierCode} = ctx.params
     const supplier = await service.deleteSupplier(
       ctx.user?.email as string,
-      supplierId,
+      supplierCode,
     )
     ctx.body = buildResponse({data: supplier})
   }
