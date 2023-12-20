@@ -11,18 +11,33 @@ export type User = {
   name: string
   email: string
   password: string
-  business: Business
   role: Role
   createdAt: Date
   updatedAt: Date
 }
 
+export type UserWithBusiness = User & {
+  business: Business
+  businessId: number
+}
+
 export type SafeUser = Omit<
   User,
-  'id' | 'password' | 'business' | 'role' | 'createdAt' | 'updatedAt'
-> & {business: SafeBusiness}
+  'id' | 'password' | 'role' | 'createdAt' | 'updatedAt'
+>
+
+export type SafeUserWithBusiness = SafeUser & {
+  business: SafeBusiness
+}
 
 export const safeUser = (user: User): SafeUser => {
+  const {name, email} = user
+  return {name, email}
+}
+
+export const safeUserWithBusiness = (
+  user: UserWithBusiness,
+): SafeUserWithBusiness => {
   const {name, email, business} = user
   return {name, email, business: safeBusiness(business)}
 }

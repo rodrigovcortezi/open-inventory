@@ -2,9 +2,9 @@ import bcrypt from 'bcrypt'
 import {ServiceError} from './error'
 import jwt from 'jsonwebtoken'
 import type {UserRepository} from '~/repository/user'
-import {Role, safeUser, type User} from '~/models/user'
+import {Role, safeUser, safeUserWithBusiness, type User} from '~/models/user'
 import type {BusinessRepository} from '~/repository/business'
-import type {SafeUser} from '~/models/user'
+import type {SafeUser, UserWithBusiness} from '~/models/user'
 import type {SupplierRepository} from '~/repository/supplier'
 
 type UserWithToken = SafeUser & {token: string}
@@ -114,11 +114,13 @@ export const createUserService = ({
       role: Role.ADMIN,
       password: passwordHash,
     })
-    return safeUser(user)
+    return safeUserWithBusiness(user)
   },
 
   addAdminUser: async (userData: AddAdminUserDTO, loggedUserEmail: string) => {
-    const authUser = (await userRepository.findByEmail(loggedUserEmail)) as User
+    const authUser = (await userRepository.findByEmail(
+      loggedUserEmail,
+    )) as UserWithBusiness
     if (authUser.role != Role.ADMIN) {
       throw new ServiceError('User not allowed', 403)
     }
@@ -136,11 +138,13 @@ export const createUserService = ({
       businessId: authUser.business.id,
     })
 
-    return safeUser(user)
+    return safeUserWithBusiness(user)
   },
 
   addStoreUser: async (userData: AddStoreUserDTO, loggedUserEmail: string) => {
-    const authUser = (await userRepository.findByEmail(loggedUserEmail)) as User
+    const authUser = (await userRepository.findByEmail(
+      loggedUserEmail,
+    )) as UserWithBusiness
     if (authUser.role != Role.ADMIN) {
       throw new ServiceError('User not allowed', 403)
     }
@@ -158,14 +162,16 @@ export const createUserService = ({
       businessId: authUser.business.id,
     })
 
-    return safeUser(user)
+    return safeUserWithBusiness(user)
   },
 
   addSupplierUser: async (
     userData: AddSupplierUserDTO,
     loggedUserEmail: string,
   ) => {
-    const authUser = (await userRepository.findByEmail(loggedUserEmail)) as User
+    const authUser = (await userRepository.findByEmail(
+      loggedUserEmail,
+    )) as UserWithBusiness
     if (authUser.role != Role.ADMIN) {
       throw new ServiceError('User not allowed', 403)
     }
@@ -190,7 +196,7 @@ export const createUserService = ({
       supplierId: supplier.id,
     })
 
-    return safeUser(user)
+    return safeUserWithBusiness(user)
   },
 
   loginUser: async (userData: LoginUserDTO) => {
@@ -204,7 +210,7 @@ export const createUserService = ({
       const token = generateAccessToken(user)
       return {...safeUser(user), token}
     } else {
-      throw new ServiceError('Wrong password', 401)
+      throw new ServiceError('Wrong email or password', 401)
     }
   },
 
@@ -223,6 +229,6 @@ export const createUserService = ({
     }
 
     const user = await userRepository.update(id, userData)
-    return safeUser(user)
+    return safeUserWithBusiness(user)
   },
 })

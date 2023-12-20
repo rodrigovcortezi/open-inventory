@@ -1,4 +1,4 @@
-import type {Role, User} from '~/models/user'
+import type {Role, UserWithBusiness} from '~/models/user'
 
 export type CreateUserDTO = {
   name: string
@@ -26,9 +26,11 @@ export type CreateUserWithBusinessDTO = {
 }
 
 export interface UserRepository {
-  create: (user: CreateUserDTO) => Promise<User>
-  createWithBusiness: (user: CreateUserWithBusinessDTO) => Promise<User>
-  update: (id: number, data: UpdateUserDTO) => Promise<User>
-  findByEmail: (email: string) => Promise<User | null>
-  findByID: (id: number) => Promise<User | null>
+  create: (user: CreateUserDTO) => Promise<UserWithBusiness>
+  createWithBusiness: (
+    user: CreateUserWithBusinessDTO,
+  ) => Promise<UserWithBusiness>
+  update: (id: number, data: UpdateUserDTO) => Promise<UserWithBusiness>
+  findByEmail: (email: string) => Promise<UserWithBusiness | null>
+  findByID: (id: number) => Promise<UserWithBusiness | null>
 }
