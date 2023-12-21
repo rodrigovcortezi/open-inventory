@@ -6,9 +6,6 @@ import type {
 } from '../inventory'
 
 export const createInventoryRepository = (): InventoryRepository => ({
-  findById: async (id: number) => {
-    return await prisma.inventory.findUnique({where: {id}})
-  },
   findByCode: async (code: string) => {
     return await prisma.inventory.findUnique({
       where: {code},

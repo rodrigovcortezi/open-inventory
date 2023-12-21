@@ -6,7 +6,6 @@ import type {
 } from '~/usecases/inventory'
 import type {UserContext} from '~/server/middlewares/authenticate'
 import {buildResponse} from '~/server/response'
-import {ControllerError} from './error'
 
 export type InventoryService = {
   registerInventory: RegisterInventoryUseCase
@@ -52,14 +51,11 @@ export const createInventoryController = ({
   }
 
   const deleteInventory = async (ctx: UserContext) => {
-    const inventoryId = parseInt(ctx.params.id)
-    if (isNaN(inventoryId)) {
-      throw new ControllerError('Invalid param')
-    }
+    const {inventoryCode} = ctx.params
 
     const inventory = await service.deleteInventory(
       ctx.user?.email as string,
-      inventoryId,
+      inventoryCode,
     )
 
     ctx.body = buildResponse({data: inventory})

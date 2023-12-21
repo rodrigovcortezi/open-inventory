@@ -11,7 +11,6 @@ export type UpdateInventoryDTO = {
 }
 
 export interface InventoryRepository {
-  findById: (id: number) => Promise<Inventory | null>
   create: (data: CreateInventoryDTO) => Promise<Inventory>
   findByCode: (code: string) => Promise<Inventory | null>
   findByBusinessId: (businessId: number) => Promise<Inventory[]>

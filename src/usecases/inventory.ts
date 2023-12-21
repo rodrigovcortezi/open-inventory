@@ -2,11 +2,7 @@ import type {UserRepository} from '~/repository/user'
 import type {InventoryRepository} from '~/repository/inventory'
 import {ServiceError} from './error'
 import {UniqueCharOTP} from 'unique-string-generator'
-import {
-  safeInventory,
-  type Inventory,
-  type SafeInventory,
-} from '~/models/inventory'
+import {safeInventory, type SafeInventory} from '~/models/inventory'
 import {Role} from '~/models/user'
 
 type InventoryServiceParams = {
@@ -39,8 +35,8 @@ export type UpdateInventoryUseCase = (
 
 export type DeleteInventoryUseCase = (
   loggedUserEmail: string,
-  id: number,
-) => Promise<Inventory>
+  inventoryCode: string,
+) => Promise<SafeInventory>
 
 export const createInventoryService = ({
   userRepository,
@@ -119,23 +115,23 @@ export const createInventoryService = ({
 
     return safeInventory(changedInventory)
   },
-  deleteInventory: async (loggedUserEmail: string, id: number) => {
-    const user = await userRepository.findByEmail(loggedUserEmail)
-    if (!user) {
+  deleteInventory: async (loggedUserEmail: string, inventoryCode: string) => {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
       throw new ServiceError('User not found', 404)
     }
 
-    const inventory = await inventoryRepository.findById(id)
-    if (!inventory) {
+    if (authUser.role !== Role.ADMIN) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    const inventory = await inventoryRepository.findByCode(inventoryCode)
+    if (!inventory || inventory.businessId !== authUser.businessId) {
       throw new ServiceError('Inventory not found', 404)
     }
 
-    if (user.business.id !== inventory.businessId) {
-      throw new ServiceError('Inventory does not belong to user business', 403)
-    }
+    await inventoryRepository.delete(inventory.id)
 
-    await inventoryRepository.delete(id)
-
-    return inventory
+    return safeInventory(inventory)
   },
 })

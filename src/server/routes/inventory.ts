@@ -32,7 +32,7 @@ export const createInventoryRouter = ({service}: InventoryRouterParams) => {
     authenticate,
     updateInventory,
   )
-  router.delete('/:id', authenticate, deleteInventory)
+  router.delete('/:inventoryCode', authenticate, deleteInventory)
 
   return router
 }
