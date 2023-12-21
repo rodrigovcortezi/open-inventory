@@ -10,7 +10,11 @@ import {
 import {Role} from '~/models/user'
 import type {InventoryProductWithProduct} from '~/models/inventory_product'
 import type {InventoryTransactionRepository} from '~/repository/inventory_transaction'
-import {TransactionType} from '~/models/inventory_transaction'
+import {
+  type SafeInventoryTransactionWithItems,
+  safeInventoryTransactionWithItems,
+  TransactionType,
+} from '~/models/inventory_transaction'
 
 type InventoryProductServiceParams = {
   userRepository: UserRepository
@@ -29,6 +33,11 @@ export type GetInventoryWithProductsUseCase = (
   inventoryCode: string,
   productSku?: string,
 ) => Promise<SafeInventoryWithProducts>
+
+export type GetInventoryTransactionsUseCase = (
+  loggedUserEmail: string,
+  inventoryCode: string,
+) => Promise<SafeInventoryTransactionWithItems[]>
 
 export type AdjustProductStockUseCase = (
   loggedUserEmail: string,
@@ -102,6 +111,39 @@ export const createInventoryProductService = ({
       await inventoryProductRepository.findByInventoryId(inventory.id)
     const inventoryWithProducts = {...inventory, products: inventoryProducts}
     return safeInventoryWithProducts(inventoryWithProducts)
+  },
+  getInventoryTransactions: async (
+    loggedUserEmail: string,
+    inventoryCode: string,
+  ) => {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
+      throw new ServiceError('User not found', 404)
+    }
+
+    if (authUser.role !== Role.ADMIN && authUser.role !== Role.SUPPLIER) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    const inventory = await inventoryRepository.findByCode(inventoryCode)
+    if (!inventory || inventory.businessId !== authUser.businessId) {
+      throw new ServiceError('Inventory not found', 404)
+    }
+
+    if (authUser.role === Role.SUPPLIER) {
+      const transactions =
+        await inventoryTransactionRepository.findByInventoryIdAndProductSupplier(
+          inventory.id,
+          authUser.supplierId as number,
+        )
+      return transactions.map(t => safeInventoryTransactionWithItems(t))
+    }
+
+    const transactions = await inventoryTransactionRepository.findByInventoryId(
+      inventory.id,
+    )
+
+    return transactions.map(t => safeInventoryTransactionWithItems(t))
   },
   adjustProductStock: async (
     loggedUserEmail: string,

@@ -2253,10 +2253,6 @@ components:
     InventoryMovement:
       type: object
       properties:
-        inventory:
-          type: string
-          example: KNRUG
-          readOnly: true
         timestamp:
           type: string
           example: 2023-11-20T10:00:00

@@ -1,5 +1,6 @@
 import type {
   InventoryTransaction,
+  InventoryTransactionWithItems,
   TransactionType,
 } from '~/models/inventory_transaction'
 
@@ -17,4 +18,11 @@ export type CreateInventoryTransactionDTO = {
 
 export interface InventoryTransactionRepository {
   create: (data: CreateInventoryTransactionDTO) => Promise<InventoryTransaction>
+  findByInventoryId: (
+    inventoryId: number,
+  ) => Promise<InventoryTransactionWithItems[]>
+  findByInventoryIdAndProductSupplier: (
+    inventoryId: number,
+    supplierId: number,
+  ) => Promise<InventoryTransactionWithItems[]>
 }
