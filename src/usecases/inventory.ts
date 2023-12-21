@@ -103,6 +103,10 @@ export const createInventoryService = ({
       throw new ServiceError('User not found', 404)
     }
 
+    if (authUser.role !== Role.ADMIN) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
     const inventory = await inventoryRepository.findByCode(inventoryCode)
     if (!inventory || inventory.businessId !== authUser.businessId) {
       throw new ServiceError('Inventory not found', 404)
