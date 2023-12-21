@@ -17,7 +17,13 @@ export interface InventoryProductRepository {
   create: (
     data: CreateInventoryProductDTO,
   ) => Promise<InventoryProductWithProduct>
-  findByProductId: (productId: number) => Promise<InventoryProduct | null>
+  findByInventoryIdAndProductId: (
+    inventoryId: number,
+    productId: number,
+  ) => Promise<InventoryProduct | null>
+  findByInventoryId: (
+    inventoryId: number,
+  ) => Promise<InventoryProductWithProduct[]>
   update: (
     id: number,
     data: UpdateInventoryProductDTO,

@@ -24,6 +24,11 @@ type AdjustmentDTO = {
   variation: number
 }
 
+export type GetInventoryWithProductsUseCase = (
+  loggedUserEmail: string,
+  inventoryCode: string,
+) => Promise<SafeInventoryWithProducts>
+
 export type AdjustProductStockUseCase = (
   loggedUserEmail: string,
   inventoryCode: string,
@@ -38,6 +43,29 @@ export const createInventoryProductService = ({
   inventoryProductRepository,
   inventoryTransactionRepository,
 }: InventoryProductServiceParams) => ({
+  getInventoryWithProducts: async (
+    loggedUserEmail: string,
+    inventoryCode: string,
+  ) => {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
+      throw new ServiceError('User not found', 404)
+    }
+
+    if (authUser.role !== Role.ADMIN && authUser.role !== Role.SUPPLIER) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    const inventory = await inventoryRepository.findByCode(inventoryCode)
+    if (!inventory || inventory.businessId !== authUser.businessId) {
+      throw new ServiceError('Inventory not found', 404)
+    }
+
+    const inventoryProducts =
+      await inventoryProductRepository.findByInventoryId(inventory.id)
+    const inventoryWithProducts = {...inventory, products: inventoryProducts}
+    return safeInventoryWithProducts(inventoryWithProducts)
+  },
   adjustProductStock: async (
     loggedUserEmail: string,
     inventoryCode: string,
@@ -66,9 +94,11 @@ export const createInventoryProductService = ({
       throw new ServiceError('Product not found', 404)
     }
 
-    const inventoryProduct = await inventoryProductRepository.findByProductId(
-      product.id,
-    )
+    const inventoryProduct =
+      await inventoryProductRepository.findByInventoryIdAndProductId(
+        inventory.id,
+        product.id,
+      )
 
     const resultQuantity =
       (inventoryProduct?.quantity ?? 0) + adjustmentData.variation

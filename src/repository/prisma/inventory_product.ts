@@ -13,8 +13,19 @@ export const createInventoryProductRepository =
         include: {product: true},
       })
     },
-    findByProductId: async (productId: number) => {
-      return await prisma.inventoryProduct.findFirst({where: {productId}})
+    findByInventoryIdAndProductId: async (
+      inventoryId: number,
+      productId: number,
+    ) => {
+      return await prisma.inventoryProduct.findFirst({
+        where: {inventoryId, productId},
+      })
+    },
+    findByInventoryId: async (inventoryId: number) => {
+      return await prisma.inventoryProduct.findMany({
+        where: {inventoryId},
+        include: {product: true},
+      })
     },
     update: async (id: number, data: UpdateInventoryProductDTO) => {
       return await prisma.inventoryProduct.update({
