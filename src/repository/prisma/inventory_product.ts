@@ -28,6 +28,20 @@ export const createInventoryProductRepository =
         include: {product: true},
       })
     },
+    findByInventoryIdAndProductSupplier: async (
+      inventoryId: number,
+      supplierId: number,
+    ) => {
+      return await prisma.inventoryProduct.findMany({
+        where: {
+          inventoryId,
+          product: {
+            supplierId,
+          },
+        },
+        include: {product: true},
+      })
+    },
     update: async (id: number, data: UpdateInventoryProductDTO) => {
       return await prisma.inventoryProduct.update({
         where: {id},

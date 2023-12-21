@@ -13,6 +13,7 @@ export type User = {
   password: string
   role: Role
   businessId: number
+  supplierId?: number | null
   createdAt: Date
   updatedAt: Date
 }
@@ -23,7 +24,13 @@ export type UserWithBusiness = User & {
 
 export type SafeUser = Omit<
   User,
-  'id' | 'password' | 'role' | 'businessId' | 'createdAt' | 'updatedAt'
+  | 'id'
+  | 'password'
+  | 'role'
+  | 'businessId'
+  | 'supplierId'
+  | 'createdAt'
+  | 'updatedAt'
 >
 
 export type SafeUserWithBusiness = SafeUser & {

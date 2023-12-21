@@ -68,7 +68,11 @@ export const createInventoryProductService = ({
         authUser.businessId,
         productSku,
       )
-      if (!product) {
+      if (
+        !product ||
+        (authUser.role === Role.SUPPLIER &&
+          product.supplierId !== authUser.supplierId)
+      ) {
         throw new ServiceError('Product not found', 404)
       }
 
@@ -81,6 +85,16 @@ export const createInventoryProductService = ({
         ...inventory,
         products: inventoryProduct ? [inventoryProduct] : [],
       }
+      return safeInventoryWithProducts(inventoryWithProducts)
+    }
+
+    if (authUser.role === Role.SUPPLIER) {
+      const inventoryProducts =
+        await inventoryProductRepository.findByInventoryIdAndProductSupplier(
+          inventory.id,
+          authUser.supplierId as number,
+        )
+      const inventoryWithProducts = {...inventory, products: inventoryProducts}
       return safeInventoryWithProducts(inventoryWithProducts)
     }
 
