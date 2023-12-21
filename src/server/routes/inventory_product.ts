@@ -14,10 +14,14 @@ type InventoryProductRouterParams = {
 export const createInventoryProductRouter = ({
   service,
 }: InventoryProductRouterParams) => {
-  const {adjustProductStock, getInventory, getInventoryTransactions} =
-    createInventoryProductController({
-      service,
-    })
+  const {
+    adjustProductStock,
+    getInventory,
+    getProductWithInventories,
+    getInventoryTransactions,
+  } = createInventoryProductController({
+    service,
+  })
 
   const router = new Router({prefix: '/inventories'})
   router.post(
@@ -26,6 +30,7 @@ export const createInventoryProductRouter = ({
     authenticate,
     adjustProductStock,
   )
+  router.get('/products/:productSku', authenticate, getProductWithInventories)
   router.get('/:inventoryCode/products', authenticate, getInventory)
   router.get(
     '/:inventoryCode/movements',

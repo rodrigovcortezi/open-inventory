@@ -1,3 +1,4 @@
+import type {Inventory} from './inventory'
 import type {Product} from './product'
 
 export type InventoryProduct = {
@@ -9,6 +10,10 @@ export type InventoryProduct = {
 
 export type InventoryProductWithProduct = InventoryProduct & {
   product: Product
+}
+
+export type InventoryProductWithInventory = InventoryProduct & {
+  inventory: Inventory
 }
 
 export type SafeInventoryProduct = Pick<InventoryProduct, 'quantity'> & {

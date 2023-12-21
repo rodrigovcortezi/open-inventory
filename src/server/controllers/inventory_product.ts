@@ -2,12 +2,14 @@ import type {
   AdjustProductStockUseCase,
   GetInventoryTransactionsUseCase,
   GetInventoryWithProductsUseCase,
+  GetProductWithAllInventoriesUseCase,
 } from '~/usecases/inventory_product'
 import type {UserContext} from '../middlewares/authenticate'
 import {buildResponse} from '../response'
 
 export type InventoryProductService = {
   adjustProductStock: AdjustProductStockUseCase
+  getProductWithAllInventories: GetProductWithAllInventoriesUseCase
   getInventoryWithProducts: GetInventoryWithProductsUseCase
   getInventoryTransactions: GetInventoryTransactionsUseCase
 }
@@ -19,6 +21,16 @@ type InventoryProductControllerParams = {
 export const createInventoryProductController = ({
   service,
 }: InventoryProductControllerParams) => {
+  const getProductWithInventories = async (ctx: UserContext) => {
+    const {productSku} = ctx.params
+
+    const product = await service.getProductWithAllInventories(
+      ctx.user?.email as string,
+      productSku,
+    )
+    ctx.body = buildResponse({data: product})
+  }
+
   const getInventory = async (ctx: UserContext) => {
     const {inventoryCode} = ctx.params
     const {productSku} = ctx.query
@@ -63,5 +75,10 @@ export const createInventoryProductController = ({
     ctx.status = 201
   }
 
-  return {getInventory, getInventoryTransactions, adjustProductStock}
+  return {
+    getProductWithInventories,
+    getInventory,
+    getInventoryTransactions,
+    adjustProductStock,
+  }
 }

@@ -15,6 +15,7 @@ import {
   safeInventoryTransactionWithItems,
   TransactionType,
 } from '~/models/inventory_transaction'
+import {type SafeProductWithInventories, safeProduct} from '~/models/product'
 
 type InventoryProductServiceParams = {
   userRepository: UserRepository
@@ -33,6 +34,11 @@ type GetInventoryTransactionsOptions = {
   fromDate?: Date
   toDate?: Date
 }
+
+export type GetProductWithAllInventoriesUseCase = (
+  loggedUserEmail: string,
+  productSku: string,
+) => Promise<SafeProductWithInventories>
 
 export type GetInventoryWithProductsUseCase = (
   loggedUserEmail: string,
@@ -60,6 +66,45 @@ export const createInventoryProductService = ({
   inventoryProductRepository,
   inventoryTransactionRepository,
 }: InventoryProductServiceParams) => ({
+  getProductWithAllInventories: async (
+    loggedUserEmail: string,
+    productSku: string,
+  ) => {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
+      throw new ServiceError('User not found', 404)
+    }
+
+    if (authUser.role !== Role.ADMIN && authUser.role !== Role.SUPPLIER) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    const product = await productRepository.findByBusinessIdAndSKU(
+      authUser.businessId,
+      productSku,
+    )
+    if (
+      !product ||
+      (authUser.role === Role.SUPPLIER &&
+        product.supplierId !== authUser.supplierId)
+    ) {
+      throw new ServiceError('Product not found', 404)
+    }
+
+    const inventoryProducts = await inventoryProductRepository.findByProductId(
+      product.id,
+    )
+
+    const productWithInventories = {
+      ...safeProduct(product),
+      supplierCode: product.supplier.code,
+      inventories: inventoryProducts.map(p => ({
+        inventory: p.inventory.code,
+        quantity: p.quantity,
+      })),
+    }
+    return productWithInventories
+  },
   getInventoryWithProducts: async (
     loggedUserEmail: string,
     inventoryCode: string,
