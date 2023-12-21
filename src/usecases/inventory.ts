@@ -2,7 +2,12 @@ import type {UserRepository} from '~/repository/user'
 import type {InventoryRepository} from '~/repository/inventory'
 import {ServiceError} from './error'
 import {UniqueCharOTP} from 'unique-string-generator'
-import type {Inventory} from '~/models/inventory'
+import {
+  safeInventory,
+  type Inventory,
+  type SafeInventory,
+} from '~/models/inventory'
+import {Role} from '~/models/user'
 
 type InventoryServiceParams = {
   userRepository: UserRepository
@@ -20,7 +25,7 @@ type UpdateInventoryDTO = {
 export type RegisterInventoryUseCase = (
   loggedUserEmail: string,
   inventoryData: RegisterInventoryDTO,
-) => Promise<Inventory>
+) => Promise<SafeInventory>
 
 export type UpdateInventoryUseCase = (
   loggedUserEmail: string,
@@ -41,18 +46,33 @@ export const createInventoryService = ({
     loggedUserEmail: string,
     inventoryData: RegisterInventoryDTO,
   ) => {
-    const user = await userRepository.findByEmail(loggedUserEmail)
-    if (!user) {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
       throw new ServiceError('User not found', 404)
     }
 
+    if (authUser.role !== Role.ADMIN) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    let inventoryCode = null
+    while (inventoryCode === null) {
+      const code = UniqueCharOTP(5)
+      const inventoryExists = Boolean(
+        await inventoryRepository.findByCode(code),
+      )
+      if (!inventoryExists) {
+        inventoryCode = code
+      }
+    }
+
     const inventory = await inventoryRepository.create({
-      ...inventoryData,
-      code: UniqueCharOTP(5),
-      businessId: user.business.id as number,
+      name: inventoryData.name,
+      code: inventoryCode,
+      businessId: authUser.businessId,
     })
 
-    return inventory
+    return safeInventory(inventory)
   },
   updateInventory: async (
     loggedUserEmail: string,
@@ -69,7 +89,7 @@ export const createInventoryService = ({
       throw new ServiceError('Inventory not found', 404)
     }
 
-    if (user.business.id !== inventory.business.id) {
+    if (user.business.id !== inventory.businessId) {
       throw new ServiceError('Inventory does not belong to user business', 403)
     }
 
@@ -88,7 +108,7 @@ export const createInventoryService = ({
       throw new ServiceError('Inventory not found', 404)
     }
 
-    if (user.business.id !== inventory.business.id) {
+    if (user.business.id !== inventory.businessId) {
       throw new ServiceError('Inventory does not belong to user business', 403)
     }
 

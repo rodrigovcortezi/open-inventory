@@ -27,6 +27,7 @@ export const createInventoryController = ({
     )
 
     ctx.body = buildResponse({data: inventory})
+    ctx.status = 201
   }
 
   const updateInventory = async (ctx: UserContext) => {
