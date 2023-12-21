@@ -15,7 +15,7 @@ type InventoryRouterParams = {
 }
 
 export const createInventoryRouter = ({service}: InventoryRouterParams) => {
-  const {registerInventory, updateInventory, deleteInventory} =
+  const {registerInventory, findAll, updateInventory, deleteInventory} =
     createInventoryController({service})
 
   const router = new Router({prefix: '/inventories'})
@@ -25,6 +25,7 @@ export const createInventoryRouter = ({service}: InventoryRouterParams) => {
     authenticate,
     registerInventory,
   )
+  router.get('/', authenticate, findAll)
   router.put(
     '/:id',
     validate(UpdateInventorySchema),

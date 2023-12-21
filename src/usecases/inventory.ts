@@ -27,6 +27,10 @@ export type RegisterInventoryUseCase = (
   inventoryData: RegisterInventoryDTO,
 ) => Promise<SafeInventory>
 
+export type GetAllInventoriesUseCase = (
+  loggedUserEmail: string,
+) => Promise<SafeInventory[]>
+
 export type UpdateInventoryUseCase = (
   loggedUserEmail: string,
   id: number,
@@ -73,6 +77,21 @@ export const createInventoryService = ({
     })
 
     return safeInventory(inventory)
+  },
+  getAllInventories: async (loggedUserEmail: string) => {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
+      throw new ServiceError('User not found', 404)
+    }
+
+    if (authUser.role !== Role.ADMIN) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    const inventories = await inventoryRepository.findByBusinessId(
+      authUser.businessId,
+    )
+    return inventories.map(i => safeInventory(i))
   },
   updateInventory: async (
     loggedUserEmail: string,

@@ -1,5 +1,6 @@
 import type {
   DeleteInventoryUseCase,
+  GetAllInventoriesUseCase,
   RegisterInventoryUseCase,
   UpdateInventoryUseCase,
 } from '~/usecases/inventory'
@@ -9,6 +10,7 @@ import {ControllerError} from './error'
 
 export type InventoryService = {
   registerInventory: RegisterInventoryUseCase
+  getAllInventories: GetAllInventoriesUseCase
   updateInventory: UpdateInventoryUseCase
   deleteInventory: DeleteInventoryUseCase
 }
@@ -28,6 +30,13 @@ export const createInventoryController = ({
 
     ctx.body = buildResponse({data: inventory})
     ctx.status = 201
+  }
+
+  const findAll = async (ctx: UserContext) => {
+    const inventories = await service.getAllInventories(
+      ctx.user?.email as string,
+    )
+    ctx.body = buildResponse({data: {inventories}})
   }
 
   const updateInventory = async (ctx: UserContext) => {
@@ -59,5 +68,5 @@ export const createInventoryController = ({
     ctx.body = buildResponse({data: inventory})
   }
 
-  return {registerInventory, updateInventory, deleteInventory}
+  return {registerInventory, findAll, updateInventory, deleteInventory}
 }

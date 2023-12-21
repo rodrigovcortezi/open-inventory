@@ -14,6 +14,9 @@ export const createInventoryRepository = (): InventoryRepository => ({
       where: {code},
     })
   },
+  findByBusinessId: async (businessId: number) => {
+    return await prisma.inventory.findMany({where: {businessId}})
+  },
   create: async (data: CreateInventoryDTO) => {
     return await prisma.inventory.create({data})
   },
