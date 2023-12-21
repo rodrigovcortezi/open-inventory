@@ -1,4 +1,7 @@
-import type {InventoryProductWithoutRelations} from '~/models/inventory_product'
+import type {
+  InventoryProduct,
+  InventoryProductWithProduct,
+} from '~/models/inventory_product'
 
 export type CreateInventoryProductDTO = {
   inventoryId: number
@@ -13,12 +16,10 @@ export type UpdateInventoryProductDTO = {
 export interface InventoryProductRepository {
   create: (
     data: CreateInventoryProductDTO,
-  ) => Promise<InventoryProductWithoutRelations>
-  findByProductId: (
-    productId: number,
-  ) => Promise<InventoryProductWithoutRelations | null>
+  ) => Promise<InventoryProductWithProduct>
+  findByProductId: (productId: number) => Promise<InventoryProduct | null>
   update: (
     id: number,
     data: UpdateInventoryProductDTO,
-  ) => Promise<InventoryProductWithoutRelations>
+  ) => Promise<InventoryProductWithProduct>
 }

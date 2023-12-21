@@ -15,18 +15,16 @@ export const createInventoryProductController = ({
 }: InventoryProductControllerParams) => {
   const adjustProductStock = async (ctx: UserContext) => {
     const {inventoryCode, productSku} = ctx.params
-    const {quantity} = ctx.request.body
 
     const inventoryProduct = await service.adjustProductStock(
       ctx.user?.email as string,
-      {
-        inventoryCode,
-        productSku,
-        quantity,
-      },
+      inventoryCode,
+      productSku,
+      ctx.request.body,
     )
 
     ctx.body = buildResponse({data: inventoryProduct})
+    ctx.status = 201
   }
 
   return {adjustProductStock}

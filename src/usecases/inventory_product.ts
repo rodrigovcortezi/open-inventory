@@ -1,9 +1,14 @@
-import type {InventoryProductWithoutRelations} from '~/models/inventory_product'
 import type {UserRepository} from '~/repository/user'
 import type {InventoryRepository} from '~/repository/inventory'
 import type {ProductRepository} from '~/repository/product'
 import type {InventoryProductRepository} from '~/repository/inventory_product'
 import {ServiceError} from './error'
+import {
+  safeInventoryWithProducts,
+  type SafeInventoryWithProducts,
+} from '~/models/inventory'
+import {Role} from '~/models/user'
+import type {InventoryProductWithProduct} from '~/models/inventory_product'
 
 type InventoryProductServiceParams = {
   userRepository: UserRepository
@@ -13,15 +18,15 @@ type InventoryProductServiceParams = {
 }
 
 type AdjustmentDTO = {
-  inventoryCode: string
-  productSku: string
-  quantity: number
+  variation: number
 }
 
 export type AdjustProductStockUseCase = (
   loggedUserEmail: string,
-  data: AdjustmentDTO,
-) => Promise<InventoryProductWithoutRelations>
+  inventoryCode: string,
+  productSku: string,
+  adjustmentData: AdjustmentDTO,
+) => Promise<SafeInventoryWithProducts>
 
 export const createInventoryProductService = ({
   userRepository,
@@ -29,61 +34,65 @@ export const createInventoryProductService = ({
   productRepository,
   inventoryProductRepository,
 }: InventoryProductServiceParams) => ({
-  adjustProductStock: async (loggedUserEmail: string, data: AdjustmentDTO) => {
-    const user = await userRepository.findByEmail(loggedUserEmail)
-    if (!user) {
+  adjustProductStock: async (
+    loggedUserEmail: string,
+    inventoryCode: string,
+    productSku: string,
+    adjustmentData: AdjustmentDTO,
+  ) => {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
       throw new ServiceError('User not found', 404)
     }
 
-    const {inventoryCode} = data
+    if (authUser.role !== Role.ADMIN) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
     const inventory = await inventoryRepository.findByCode(inventoryCode)
-    if (!inventory) {
+    if (!inventory || inventory.businessId !== authUser.businessId) {
       throw new ServiceError('Inventory not found', 404)
     }
 
-    if (inventory.businessId !== user.business.id) {
-      throw new ServiceError('Inventory does not belong to user business', 403)
-    }
-
-    const {productSku} = data
     const product = await productRepository.findByBusinessIdAndSKU(
-      user.businessId,
+      authUser.businessId,
       productSku,
     )
     if (!product) {
       throw new ServiceError('Product not found', 404)
     }
 
-    if (product.businessId !== user.business.id) {
-      throw new ServiceError('Product does not belong to user business', 403)
-    }
-
     const inventoryProduct = await inventoryProductRepository.findByProductId(
       product.id,
     )
 
-    const quantity = (inventoryProduct?.quantity ?? 0) + data.quantity
-    if (quantity < 0) {
+    const resultQuantity =
+      (inventoryProduct?.quantity ?? 0) + adjustmentData.variation
+    if (resultQuantity < 0) {
       throw new ServiceError(
-        'The resulting quantity of the product cannot be negative',
+        "A product's quantity in a inventory cannot be lower than zero",
         422,
       )
     }
 
-    let changedInventoryProduct: InventoryProductWithoutRelations
+    let changedInventoryProduct: InventoryProductWithProduct
     if (!inventoryProduct) {
       changedInventoryProduct = await inventoryProductRepository.create({
         inventoryId: inventory.id,
         productId: product.id,
-        quantity,
+        quantity: resultQuantity,
       })
     } else {
       changedInventoryProduct = await inventoryProductRepository.update(
         inventoryProduct.id,
-        {quantity},
+        {quantity: resultQuantity},
       )
     }
 
-    return changedInventoryProduct
+    const inventoryWithProducts = {
+      ...inventory,
+      products: [changedInventoryProduct],
+    }
+    return safeInventoryWithProducts(inventoryWithProducts)
   },
 })

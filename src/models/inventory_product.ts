@@ -1,16 +1,23 @@
-import type {Inventory} from './inventory'
 import type {Product} from './product'
 
 export type InventoryProduct = {
   id: number
   inventoryId: number
-  inventory: Inventory
   productId: number
-  product: Product
   quantity: number
 }
 
-export type InventoryProductWithoutRelations = Omit<
-  InventoryProduct,
-  'inventory' | 'product'
->
+export type InventoryProductWithProduct = InventoryProduct & {
+  product: Product
+}
+
+export type SafeInventoryProduct = Pick<InventoryProduct, 'quantity'> & {
+  sku: string
+}
+
+export const safeInventoryProduct = (
+  inventoryProduct: InventoryProductWithProduct,
+): SafeInventoryProduct => {
+  const {quantity, product} = inventoryProduct
+  return {quantity, sku: product.sku}
+}
