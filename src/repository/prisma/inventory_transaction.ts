@@ -5,6 +5,7 @@ import type {
 import {prisma} from '.'
 import type {
   CreateInventoryTransactionDTO,
+  TransactionFilters,
   InventoryTransactionRepository,
 } from '../inventory_transaction'
 
@@ -24,37 +25,29 @@ export const createInventoryTransactionRepository =
 
       return {...transaction, type: transaction.type as TransactionType}
     },
-    findByInventoryId: async (inventoryId: number) => {
-      const transactions = await prisma.inventoryTransaction.findMany({
-        where: {inventoryId},
-        include: {
-          items: {
-            include: {
-              product: true,
-            },
-          },
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
-      })
-
-      return transactions as InventoryTransactionWithItems[]
-    },
-    findByInventoryIdAndProductSupplier: async (
+    findByInventoryId: async (
       inventoryId: number,
-      supplierId: number,
+      filters: TransactionFilters,
     ) => {
       const transactions = await prisma.inventoryTransaction.findMany({
         where: {
           inventoryId,
-          items: {
-            some: {
-              product: {
-                supplierId,
-              },
-            },
-          },
+          items: filters.product
+            ? {
+                some: {
+                  product: {
+                    sku: filters.product.sku,
+                    supplierId: filters.product.supplierId,
+                  },
+                },
+              }
+            : undefined,
+          createdAt: filters.date
+            ? {
+                gte: filters.date.from,
+                lte: filters.date.to,
+              }
+            : undefined,
         },
         include: {
           items: {
@@ -68,10 +61,23 @@ export const createInventoryTransactionRepository =
         },
       })
 
-      const filteredTransactions = transactions.map(t => ({
-        ...t,
-        items: t.items.filter(i => i.product.supplierId === supplierId),
-      }))
+      let filteredTransactions = transactions
+      const skuFilter = filters.product?.sku
+      if (skuFilter) {
+        filteredTransactions = filteredTransactions.map(t => ({
+          ...t,
+          items: t.items.filter(i => i.product.sku === skuFilter),
+        }))
+      }
+
+      const supplierFilter = filters.product?.supplierId
+      if (supplierFilter) {
+        filteredTransactions = filteredTransactions.map(t => ({
+          ...t,
+          items: t.items.filter(i => i.product.supplierId === supplierFilter),
+        }))
+      }
+
       return filteredTransactions as InventoryTransactionWithItems[]
     },
   })

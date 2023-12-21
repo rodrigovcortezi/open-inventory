@@ -33,10 +33,18 @@ export const createInventoryProductController = ({
 
   const getInventoryTransactions = async (ctx: UserContext) => {
     const {inventoryCode} = ctx.params
+    const productSku = ctx.query.productSKU as string | undefined
+    const fromDate = ctx.query.fromDate
+      ? new Date(ctx.query.fromDate as string)
+      : undefined
+    const toDate = ctx.query.toDate
+      ? new Date(ctx.query.toDate as string)
+      : undefined
 
     const movements = await service.getInventoryTransactions(
       ctx.user?.email as string,
       inventoryCode,
+      {productSku, fromDate, toDate},
     )
     ctx.body = buildResponse({data: {movements}})
   }

@@ -28,6 +28,12 @@ type AdjustmentDTO = {
   variation: number
 }
 
+type GetInventoryTransactionsOptions = {
+  productSku?: string
+  fromDate?: Date
+  toDate?: Date
+}
+
 export type GetInventoryWithProductsUseCase = (
   loggedUserEmail: string,
   inventoryCode: string,
@@ -37,6 +43,7 @@ export type GetInventoryWithProductsUseCase = (
 export type GetInventoryTransactionsUseCase = (
   loggedUserEmail: string,
   inventoryCode: string,
+  options: GetInventoryTransactionsOptions,
 ) => Promise<SafeInventoryTransactionWithItems[]>
 
 export type AdjustProductStockUseCase = (
@@ -115,6 +122,7 @@ export const createInventoryProductService = ({
   getInventoryTransactions: async (
     loggedUserEmail: string,
     inventoryCode: string,
+    options: GetInventoryTransactionsOptions,
   ) => {
     const authUser = await userRepository.findByEmail(loggedUserEmail)
     if (!authUser) {
@@ -130,17 +138,24 @@ export const createInventoryProductService = ({
       throw new ServiceError('Inventory not found', 404)
     }
 
+    const filters = {
+      product: {
+        sku: options.productSku,
+        supplierId: undefined as number | undefined,
+      },
+      date: {
+        from: options.fromDate,
+        to: options.toDate,
+      },
+    }
+
     if (authUser.role === Role.SUPPLIER) {
-      const transactions =
-        await inventoryTransactionRepository.findByInventoryIdAndProductSupplier(
-          inventory.id,
-          authUser.supplierId as number,
-        )
-      return transactions.map(t => safeInventoryTransactionWithItems(t))
+      filters.product.supplierId = authUser.supplierId as number
     }
 
     const transactions = await inventoryTransactionRepository.findByInventoryId(
       inventory.id,
+      filters,
     )
 
     return transactions.map(t => safeInventoryTransactionWithItems(t))

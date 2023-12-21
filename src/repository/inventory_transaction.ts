@@ -16,13 +16,25 @@ export type CreateInventoryTransactionDTO = {
   items: CreateInventoryTransactionItemDTO[]
 }
 
+type ProductFilters = {
+  sku?: string
+  supplierId?: number
+}
+
+type DateFilters = {
+  from?: Date
+  to?: Date
+}
+
+export type TransactionFilters = {
+  product?: ProductFilters
+  date?: DateFilters
+}
+
 export interface InventoryTransactionRepository {
   create: (data: CreateInventoryTransactionDTO) => Promise<InventoryTransaction>
   findByInventoryId: (
     inventoryId: number,
-  ) => Promise<InventoryTransactionWithItems[]>
-  findByInventoryIdAndProductSupplier: (
-    inventoryId: number,
-    supplierId: number,
+    filters: TransactionFilters,
   ) => Promise<InventoryTransactionWithItems[]>
 }
