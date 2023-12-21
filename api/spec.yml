@@ -1205,7 +1205,7 @@ paths:
                     type: boolean
                     example: true
                   data:
-                    $ref: '#/components/schemas/InventoryMovement'
+                    $ref: '#/components/schemas/InventoryWithProducts'
         400:
           description: Bad request
           content:
@@ -2274,7 +2274,7 @@ components:
       properties:
         variation:
           type: integer
-          example: 10
+          example: 100
       required:
         - variation
     InventoryMovements:
