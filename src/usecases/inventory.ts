@@ -33,9 +33,9 @@ export type GetAllInventoriesUseCase = (
 
 export type UpdateInventoryUseCase = (
   loggedUserEmail: string,
-  id: number,
+  inventoryCode: string,
   inventoryData: UpdateInventoryDTO,
-) => Promise<Inventory>
+) => Promise<SafeInventory>
 
 export type DeleteInventoryUseCase = (
   loggedUserEmail: string,
@@ -95,26 +95,25 @@ export const createInventoryService = ({
   },
   updateInventory: async (
     loggedUserEmail: string,
-    id: number,
+    inventoryCode: string,
     inventoryData: UpdateInventoryDTO,
   ) => {
-    const user = await userRepository.findByEmail(loggedUserEmail)
-    if (!user) {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
       throw new ServiceError('User not found', 404)
     }
 
-    const inventory = await inventoryRepository.findById(id)
-    if (!inventory) {
+    const inventory = await inventoryRepository.findByCode(inventoryCode)
+    if (!inventory || inventory.businessId !== authUser.businessId) {
       throw new ServiceError('Inventory not found', 404)
     }
 
-    if (user.business.id !== inventory.businessId) {
-      throw new ServiceError('Inventory does not belong to user business', 403)
-    }
+    const changedInventory = await inventoryRepository.update(
+      inventory.id,
+      inventoryData,
+    )
 
-    const changedInventory = await inventoryRepository.update(id, inventoryData)
-
-    return changedInventory
+    return safeInventory(changedInventory)
   },
   deleteInventory: async (loggedUserEmail: string, id: number) => {
     const user = await userRepository.findByEmail(loggedUserEmail)

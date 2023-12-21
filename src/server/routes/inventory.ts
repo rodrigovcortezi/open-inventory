@@ -27,7 +27,7 @@ export const createInventoryRouter = ({service}: InventoryRouterParams) => {
   )
   router.get('/', authenticate, findAll)
   router.put(
-    '/:id',
+    '/:inventoryCode',
     validate(UpdateInventorySchema),
     authenticate,
     updateInventory,

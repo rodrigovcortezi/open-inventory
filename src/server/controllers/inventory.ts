@@ -40,14 +40,11 @@ export const createInventoryController = ({
   }
 
   const updateInventory = async (ctx: UserContext) => {
-    const inventoryId = parseInt(ctx.params.id)
-    if (isNaN(inventoryId)) {
-      throw new ControllerError('Invalid param')
-    }
+    const {inventoryCode} = ctx.params
 
     const inventory = await service.updateInventory(
       ctx.user?.email as string,
-      inventoryId,
+      inventoryCode,
       ctx.request.body,
     )
 
