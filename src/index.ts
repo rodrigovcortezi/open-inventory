@@ -1,6 +1,7 @@
 import {createBusinessRepository} from './repository/prisma/business'
 import {createInventoryRepository} from './repository/prisma/inventory'
 import {createInventoryProductRepository} from './repository/prisma/inventory_product'
+import {createInventoryTransactionRepository} from './repository/prisma/inventory_transaction'
 import {createProductRepository} from './repository/prisma/product'
 import {createSupplierRepository} from './repository/prisma/supplier'
 import {createUserRepository} from './repository/prisma/user'
@@ -17,6 +18,7 @@ const supplierRepository = createSupplierRepository()
 const productRepository = createProductRepository()
 const inventoryRepository = createInventoryRepository()
 const inventoryProductRepository = createInventoryProductRepository()
+const inventoryTransactionRepository = createInventoryTransactionRepository()
 
 const userService = createUserService({
   userRepository,
@@ -41,6 +43,7 @@ const inventoryProductService = createInventoryProductService({
   inventoryRepository,
   productRepository,
   inventoryProductRepository,
+  inventoryTransactionRepository,
 })
 
 const server = createServer({

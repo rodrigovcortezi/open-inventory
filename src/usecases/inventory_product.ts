@@ -9,12 +9,15 @@ import {
 } from '~/models/inventory'
 import {Role} from '~/models/user'
 import type {InventoryProductWithProduct} from '~/models/inventory_product'
+import type {InventoryTransactionRepository} from '~/repository/inventory_transaction'
+import {TransactionType} from '~/models/inventory_transaction'
 
 type InventoryProductServiceParams = {
   userRepository: UserRepository
   inventoryRepository: InventoryRepository
   productRepository: ProductRepository
   inventoryProductRepository: InventoryProductRepository
+  inventoryTransactionRepository: InventoryTransactionRepository
 }
 
 type AdjustmentDTO = {
@@ -33,6 +36,7 @@ export const createInventoryProductService = ({
   inventoryRepository,
   productRepository,
   inventoryProductRepository,
+  inventoryTransactionRepository,
 }: InventoryProductServiceParams) => ({
   adjustProductStock: async (
     loggedUserEmail: string,
@@ -88,6 +92,18 @@ export const createInventoryProductService = ({
         {quantity: resultQuantity},
       )
     }
+
+    await inventoryTransactionRepository.create({
+      inventoryId: inventory.id,
+      userId: authUser.id,
+      type: TransactionType.ADJUSTMENT,
+      items: [
+        {
+          productId: product.id,
+          quantity: adjustmentData.variation,
+        },
+      ],
+    })
 
     const inventoryWithProducts = {
       ...inventory,
