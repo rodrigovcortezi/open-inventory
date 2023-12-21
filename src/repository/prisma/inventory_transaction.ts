@@ -11,6 +11,7 @@ export const createInventoryTransactionRepository =
       const transaction = await prisma.inventoryTransaction.create({
         data: {
           inventoryId: data.inventoryId,
+          userId: data.userId,
           type: data.type,
           items: {
             create: data.items,
