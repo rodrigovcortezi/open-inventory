@@ -27,6 +27,7 @@ type AdjustmentDTO = {
 export type GetInventoryWithProductsUseCase = (
   loggedUserEmail: string,
   inventoryCode: string,
+  productSku?: string,
 ) => Promise<SafeInventoryWithProducts>
 
 export type AdjustProductStockUseCase = (
@@ -46,6 +47,7 @@ export const createInventoryProductService = ({
   getInventoryWithProducts: async (
     loggedUserEmail: string,
     inventoryCode: string,
+    productSku?: string,
   ) => {
     const authUser = await userRepository.findByEmail(loggedUserEmail)
     if (!authUser) {
@@ -59,6 +61,27 @@ export const createInventoryProductService = ({
     const inventory = await inventoryRepository.findByCode(inventoryCode)
     if (!inventory || inventory.businessId !== authUser.businessId) {
       throw new ServiceError('Inventory not found', 404)
+    }
+
+    if (productSku) {
+      const product = await productRepository.findByBusinessIdAndSKU(
+        authUser.businessId,
+        productSku,
+      )
+      if (!product) {
+        throw new ServiceError('Product not found', 404)
+      }
+
+      const inventoryProduct =
+        await inventoryProductRepository.findByInventoryIdAndProductId(
+          inventory.id,
+          product.id,
+        )
+      const inventoryWithProducts = {
+        ...inventory,
+        products: inventoryProduct ? [inventoryProduct] : [],
+      }
+      return safeInventoryWithProducts(inventoryWithProducts)
     }
 
     const inventoryProducts =

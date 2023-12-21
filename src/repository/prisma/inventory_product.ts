@@ -19,6 +19,7 @@ export const createInventoryProductRepository =
     ) => {
       return await prisma.inventoryProduct.findFirst({
         where: {inventoryId, productId},
+        include: {product: true},
       })
     },
     findByInventoryId: async (inventoryId: number) => {
