@@ -34,6 +34,15 @@ type RegisterSaleDTO = {
   items: SaleItemDTO[]
 }
 
+type CheckAvailabilityItemDTO = {
+  sku: string
+  quantity: number
+}
+
+type CheckAvailabilityDTO = {
+  items: CheckAvailabilityItemDTO[]
+}
+
 type GetAllSalesOptions = {
   inventoryCode?: string
   fromDate?: Date
@@ -49,6 +58,11 @@ export type GetAllSalesUseCase = (
   loggedUserEmail: string,
   options: GetAllSalesOptions,
 ) => Promise<SafeSaleWithInventory[]>
+
+export type CheckAvailablityUseCase = (
+  loggedUserEmail: string,
+  availabilityData: CheckAvailabilityDTO,
+) => Promise<string[]>
 
 export const createSaleService = ({
   userRepository,
@@ -140,5 +154,45 @@ export const createSaleService = ({
     )
 
     return sales.map(s => safeSaleWithInventory(s))
+  },
+  checkAvailability: async (
+    loggedUserEmail: string,
+    availabilityData: CheckAvailabilityDTO,
+  ) => {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
+      throw new ServiceError('User not found', 404)
+    }
+
+    if (authUser.role !== Role.STORE) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    const inventoriesCount = new Map<string, number>()
+    for (const item of availabilityData.items) {
+      const product = await productRepository.findByBusinessIdAndSKU(
+        authUser.businessId,
+        item.sku,
+      )
+      if (!product) {
+        throw new ServiceError('Product not found', 404)
+      }
+
+      const inventoryProducts =
+        await inventoryProductRepository.findByProductId(product.id)
+      const availableInventoryProducts = inventoryProducts.filter(
+        p => p.quantity >= item.quantity,
+      )
+      availableInventoryProducts.forEach(p => {
+        const count = inventoriesCount.get(p.inventory.code) ?? 0
+        inventoriesCount.set(p.inventory.code, count + 1)
+      })
+    }
+
+    const availableInventories = Array.from(inventoriesCount.entries())
+      .filter(([, count]) => count === availabilityData.items.length)
+      .map(([code]) => code)
+
+    return availableInventories
   },
 })

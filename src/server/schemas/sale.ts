@@ -6,7 +6,16 @@ export const CreateSaleSchema = z.object({
   items: z.array(
     z.object({
       sku: z.string().min(1),
-      quantity: z.number().int().nonnegative(),
+      quantity: z.number().int().positive(),
+    }),
+  ),
+})
+
+export const CheckAvailabilitySchema = z.object({
+  items: z.array(
+    z.object({
+      sku: z.string().min(1),
+      quantity: z.number().int().positive(),
     }),
   ),
 })

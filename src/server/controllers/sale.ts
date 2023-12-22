@@ -1,10 +1,15 @@
-import type {GetAllSalesUseCase, RegisterSaleUseCase} from '~/usecases/sale'
+import type {
+  CheckAvailablityUseCase,
+  GetAllSalesUseCase,
+  RegisterSaleUseCase,
+} from '~/usecases/sale'
 import type {UserContext} from '../middlewares/authenticate'
 import {buildResponse} from '../response'
 
 export type SaleService = {
   registerSale: RegisterSaleUseCase
   getAllSales: GetAllSalesUseCase
+  checkAvailability: CheckAvailablityUseCase
 }
 
 type SaleControllerParams = {
@@ -38,5 +43,13 @@ export const createSaleController = ({service}: SaleControllerParams) => {
     ctx.body = buildResponse({data: {sales}})
   }
 
-  return {registerSale, findAll}
+  const checkAvailability = async (ctx: UserContext) => {
+    const inventories = await service.checkAvailability(
+      ctx.user?.email as string,
+      ctx.request.body,
+    )
+    ctx.body = buildResponse({data: {inventories}})
+  }
+
+  return {registerSale, findAll, checkAvailability}
 }

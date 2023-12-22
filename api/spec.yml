@@ -1666,6 +1666,14 @@ paths:
                 success: false
                 error:
                   message: User not allowed
+        404:
+          description: Product not found
+          content:
+            application/json:
+              example:
+                success: false
+                error:
+                  message: Product not found
         422:
           description: Products unavailable
           content:
