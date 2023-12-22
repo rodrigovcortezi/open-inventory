@@ -11,6 +11,8 @@ import {createInventoryProductRouter} from './inventory_product'
 import type {InventoryProductService} from '../controllers/inventory_product'
 import type {SaleService} from '../controllers/sale'
 import {createSaleRouter} from './sale'
+import type {SupplyService} from '../controllers/supply'
+import {createSupplyRouter} from './supply'
 
 type RouterParams = {
   userService: UserService
@@ -19,6 +21,7 @@ type RouterParams = {
   inventoryService: InventoryService
   inventoryProductService: InventoryProductService
   saleService: SaleService
+  supplyService: SupplyService
 }
 
 export const createRouter = ({
@@ -28,6 +31,7 @@ export const createRouter = ({
   inventoryService,
   inventoryProductService,
   saleService,
+  supplyService,
 }: RouterParams) => {
   const mainRouter = new Router()
   const userRouter = createUserRouter({service: userService})
@@ -38,6 +42,7 @@ export const createRouter = ({
     service: inventoryProductService,
   })
   const saleRouter = createSaleRouter({service: saleService})
+  const supplyRouter = createSupplyRouter({service: supplyService})
 
   mainRouter.use(userRouter.routes())
   mainRouter.use(supplierRouter.routes())
@@ -45,6 +50,7 @@ export const createRouter = ({
   mainRouter.use(inventoryRouter.routes())
   mainRouter.use(inventoryProductRouter.routes())
   mainRouter.use(saleRouter.routes())
+  mainRouter.use(supplyRouter.routes())
 
   return mainRouter
 }
