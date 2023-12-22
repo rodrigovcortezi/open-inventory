@@ -8,6 +8,7 @@ import type {SupplierService} from './controllers/supplier'
 import type {ProductService} from './controllers/product'
 import type {InventoryService} from './controllers/inventory'
 import type {InventoryProductService} from './controllers/inventory_product'
+import type {SaleService} from './controllers/sale'
 
 type ServerParams = {
   config?: {
@@ -18,6 +19,7 @@ type ServerParams = {
   productService: ProductService
   inventoryService: InventoryService
   inventoryProductService: InventoryProductService
+  saleService: SaleService
 }
 
 export const createServer = ({
@@ -27,6 +29,7 @@ export const createServer = ({
   productService,
   inventoryService,
   inventoryProductService,
+  saleService,
 }: ServerParams) => {
   const app = new Koa()
 
@@ -41,6 +44,7 @@ export const createServer = ({
     productService,
     inventoryService,
     inventoryProductService,
+    saleService,
   })
   app.use(router.routes()).use(router.allowedMethods())
 

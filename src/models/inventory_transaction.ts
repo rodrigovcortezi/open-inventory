@@ -12,6 +12,7 @@ export type InventoryTransaction = {
   id: number
   inventoryId: number
   userId?: number | null
+  saleId?: number | null
   type: TransactionType
   createdAt: Date
   updatedAt: Date
@@ -33,7 +34,7 @@ export type InventoryTransactionWithItems = InventoryTransaction & {
 
 type SafeInventoryTransaction = Omit<
   InventoryTransaction,
-  'id' | 'inventoryId' | 'userId' | 'updatedAt'
+  'id' | 'inventoryId' | 'userId' | 'saleId' | 'updatedAt'
 >
 
 type SafeInventoryTransactionItem = Omit<

@@ -4,7 +4,7 @@ import type {
   TransactionType,
 } from '~/models/inventory_transaction'
 
-type CreateInventoryTransactionItemDTO = {
+export type CreateInventoryTransactionItemDTO = {
   productId: number
   quantity: number
 }
