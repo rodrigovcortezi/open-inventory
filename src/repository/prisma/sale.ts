@@ -1,6 +1,16 @@
-import {SaleStatus, SaleWithInventory} from '~/models/sale'
+import {
+  SaleStatus,
+  SaleWithInventory,
+  SaleWithInventoryAndTransactions,
+  SaleWithTransactions,
+} from '~/models/sale'
 import {prisma} from '.'
-import type {CreateSaleDTO, SaleFilters, SaleRepository} from '../sale'
+import type {
+  CreateSaleDTO,
+  ReturnSaleDTO,
+  SaleFilters,
+  SaleRepository,
+} from '../sale'
 import {TransactionType} from '~/models/inventory_transaction'
 
 export const createSaleRepository = (): SaleRepository => ({
@@ -22,7 +32,7 @@ export const createSaleRepository = (): SaleRepository => ({
           items: {
             create: data.inventoryTransaction.items.map(i => ({
               ...i,
-              quantity: -i.quantity,
+              quantity: i.quantity,
             })),
           },
         },
@@ -59,6 +69,92 @@ export const createSaleRepository = (): SaleRepository => ({
         {...transaction, type: transaction.type as TransactionType},
       ],
     }
+  },
+  return: async (id: number, data: ReturnSaleDTO) => {
+    const {sale, transaction} = await prisma.$transaction(async tx => {
+      const sale = await tx.sale.update({
+        where: {id},
+        data: {
+          status: data.status,
+        },
+        include: {
+          inventory: true,
+          transactions: {
+            include: {
+              items: {
+                include: {
+                  product: true,
+                },
+              },
+            },
+          },
+        },
+      })
+      const transaction = await tx.inventoryTransaction.create({
+        data: {
+          inventoryId: data.inventoryTransaction.inventoryId,
+          userId: data.inventoryTransaction.userId,
+          saleId: sale.id,
+          type: data.inventoryTransaction.type,
+          items: {
+            create: data.inventoryTransaction.items.map(i => ({
+              ...i,
+              quantity: i.quantity,
+            })),
+          },
+        },
+        include: {
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      })
+      for (const item of transaction.items) {
+        const inventoryProduct = await tx.inventoryProduct.findFirst({
+          where: {
+            inventoryId: transaction.inventoryId,
+            productId: item.product.id,
+          },
+        })
+        if (!inventoryProduct) {
+          throw new Error(
+            'Could not find product in inventory while processing sale db transaction',
+          )
+        }
+        await tx.inventoryProduct.update({
+          where: {id: inventoryProduct.id},
+          data: {quantity: inventoryProduct.quantity + item.quantity},
+        })
+      }
+
+      return {sale, transaction}
+    })
+
+    const transactions = [transaction, ...sale.transactions]
+
+    return {
+      ...sale,
+      transactions,
+    } as SaleWithInventoryAndTransactions
+  },
+  findById: async (id: number) => {
+    const sale = await prisma.sale.findUnique({
+      where: {id},
+      include: {
+        transactions: {
+          include: {
+            items: {
+              include: {
+                product: true,
+              },
+            },
+          },
+        },
+      },
+    })
+    return sale as SaleWithTransactions | null
   },
   findByExternalId: async (externalId: string) => {
     const sale = await prisma.sale.findUnique({

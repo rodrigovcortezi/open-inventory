@@ -2,14 +2,17 @@ import type {
   CheckAvailablityUseCase,
   GetAllSalesUseCase,
   RegisterSaleUseCase,
+  ReturnSaleUseCase,
 } from '~/usecases/sale'
 import type {UserContext} from '../middlewares/authenticate'
 import {buildResponse} from '../response'
+import {ControllerError} from './error'
 
 export type SaleService = {
   registerSale: RegisterSaleUseCase
   getAllSales: GetAllSalesUseCase
   checkAvailability: CheckAvailablityUseCase
+  returnSale: ReturnSaleUseCase
 }
 
 type SaleControllerParams = {
@@ -51,5 +54,15 @@ export const createSaleController = ({service}: SaleControllerParams) => {
     ctx.body = buildResponse({data: {inventories}})
   }
 
-  return {registerSale, findAll, checkAvailability}
+  const returnSale = async (ctx: UserContext) => {
+    const id = parseInt(ctx.params.id, 10)
+    if (isNaN(id)) {
+      throw new ControllerError('Id must be an integer number')
+    }
+
+    const sale = await service.returnSale(ctx.user?.email as string, id)
+    ctx.body = buildResponse({data: sale})
+  }
+
+  return {registerSale, findAll, checkAvailability, returnSale}
 }

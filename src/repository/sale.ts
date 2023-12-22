@@ -2,6 +2,7 @@ import type {
   Sale,
   SaleStatus,
   SaleWithInventory,
+  SaleWithInventoryAndTransactions,
   SaleWithTransactions,
 } from '~/models/sale'
 import type {CreateInventoryTransactionDTO} from './inventory_transaction'
@@ -13,6 +14,11 @@ export type CreateSaleDTO = {
   inventoryTransaction: CreateInventoryTransactionDTO
 }
 
+export type ReturnSaleDTO = {
+  status: SaleStatus
+  inventoryTransaction: CreateInventoryTransactionDTO
+}
+
 export type SaleFilters = {
   inventoryCode?: string
   fromDate?: Date
@@ -21,6 +27,11 @@ export type SaleFilters = {
 
 export interface SaleRepository {
   create: (data: CreateSaleDTO) => Promise<SaleWithTransactions>
+  return: (
+    id: number,
+    data: ReturnSaleDTO,
+  ) => Promise<SaleWithInventoryAndTransactions>
+  findById: (id: number) => Promise<SaleWithTransactions | null>
   findByExternalId: (externalId: string) => Promise<Sale | null>
   findByBusinessId: (
     businessId: number,

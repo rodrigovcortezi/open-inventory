@@ -64,6 +64,11 @@ export type CheckAvailablityUseCase = (
   availabilityData: CheckAvailabilityDTO,
 ) => Promise<string[]>
 
+export type ReturnSaleUseCase = (
+  loggedUserEmail: string,
+  id: number,
+) => Promise<SafeSale>
+
 export const createSaleService = ({
   userRepository,
   inventoryRepository,
@@ -120,7 +125,7 @@ export const createSaleService = ({
 
       transactionItems.push({
         productId: product.id,
-        quantity: item.quantity,
+        quantity: -1 * item.quantity,
       })
     }
 
@@ -194,5 +199,47 @@ export const createSaleService = ({
       .map(([code]) => code)
 
     return availableInventories
+  },
+  returnSale: async (loggedUserEmail: string, saleId: number) => {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
+      throw new ServiceError('User not found', 404)
+    }
+
+    if (authUser.role !== Role.STORE) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    const sale = await saleRepository.findById(saleId)
+    if (!sale) {
+      throw new ServiceError('Sale not found', 404)
+    }
+
+    if (sale.status !== SaleStatus.EXECUTED) {
+      throw new ServiceError(
+        'Sale must be in executed status to be returned',
+        422,
+      )
+    }
+
+    const transactionItems: CreateInventoryTransactionItemDTO[] = []
+    for (const item of sale.transactions[0].items) {
+      transactionItems.push({
+        productId: item.product.id,
+        quantity: -1 * item.quantity,
+      })
+    }
+
+    const returnedSale = await saleRepository.return(sale.id, {
+      status: SaleStatus.RETURNED,
+      inventoryTransaction: {
+        inventoryId: sale.inventoryId,
+        userId: authUser.id,
+        type: TransactionType.SALE_RETURN,
+        items: transactionItems,
+      },
+    })
+
+    return safeSaleWithTransactions(returnedSale, returnedSale.inventory.code)
   },
 })

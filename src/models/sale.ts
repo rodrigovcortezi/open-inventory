@@ -27,6 +27,9 @@ export type SaleWithInventory = Sale & {
   inventory: Inventory
 }
 
+export type SaleWithInventoryAndTransactions = SaleWithTransactions &
+  SaleWithInventory
+
 export type SafeSale = Omit<Sale, 'inventoryId' | 'updatedAt'>
 
 export type SafeSaleWithTransactions = SafeSale & {

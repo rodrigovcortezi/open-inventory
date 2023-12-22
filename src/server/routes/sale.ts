@@ -9,9 +9,10 @@ type ProductRouterParams = {
 }
 
 export const createSaleRouter = ({service}: ProductRouterParams) => {
-  const {registerSale, findAll, checkAvailability} = createSaleController({
-    service,
-  })
+  const {registerSale, findAll, checkAvailability, returnSale} =
+    createSaleController({
+      service,
+    })
 
   const router = new Router({prefix: '/sales'})
   router.post('/', validate(CreateSaleSchema), authenticate, registerSale)
@@ -22,6 +23,7 @@ export const createSaleRouter = ({service}: ProductRouterParams) => {
     authenticate,
     checkAvailability,
   )
+  router.post('/:id/return', authenticate, returnSale)
 
   return router
 }
