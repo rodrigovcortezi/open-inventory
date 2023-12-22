@@ -2,10 +2,10 @@ import type {UserRepository} from '~/repository/user'
 import type {InventoryRepository} from '~/repository/inventory'
 import {
   SaleStatus,
-  type SafeSale,
   safeSaleWithTransactions,
   safeSaleWithInventory,
   type SafeSaleWithInventory,
+  SafeSaleWithTransactions,
 } from '~/models/sale'
 import {ServiceError} from './error'
 import {Role} from '~/models/user'
@@ -52,7 +52,7 @@ type GetAllSalesOptions = {
 export type RegisterSaleUseCase = (
   loggedUserEmail: string,
   saleData: RegisterSaleDTO,
-) => Promise<SafeSale>
+) => Promise<SafeSaleWithTransactions>
 
 export type GetAllSalesUseCase = (
   loggedUserEmail: string,
@@ -67,7 +67,12 @@ export type CheckAvailablityUseCase = (
 export type ReturnSaleUseCase = (
   loggedUserEmail: string,
   id: number,
-) => Promise<SafeSale>
+) => Promise<SafeSaleWithTransactions>
+
+export type GetSaleUseCase = (
+  loggedUserEmail: string,
+  id: number,
+) => Promise<SafeSaleWithTransactions>
 
 export const createSaleService = ({
   userRepository,
@@ -241,5 +246,22 @@ export const createSaleService = ({
     })
 
     return safeSaleWithTransactions(returnedSale, returnedSale.inventory.code)
+  },
+  getSale: async (loggedUserEmail: string, id: number) => {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
+      throw new ServiceError('User not found', 404)
+    }
+
+    if (authUser.role !== Role.ADMIN) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    const sale = await saleRepository.findById(id)
+    if (!sale) {
+      throw new ServiceError('Sale not found', 404)
+    }
+
+    return safeSaleWithTransactions(sale, sale.inventory.code)
   },
 })

@@ -31,7 +31,7 @@ export interface SaleRepository {
     id: number,
     data: ReturnSaleDTO,
   ) => Promise<SaleWithInventoryAndTransactions>
-  findById: (id: number) => Promise<SaleWithTransactions | null>
+  findById: (id: number) => Promise<SaleWithInventoryAndTransactions | null>
   findByExternalId: (externalId: string) => Promise<Sale | null>
   findByBusinessId: (
     businessId: number,

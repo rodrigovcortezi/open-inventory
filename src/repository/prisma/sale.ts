@@ -2,7 +2,6 @@ import {
   SaleStatus,
   SaleWithInventory,
   SaleWithInventoryAndTransactions,
-  SaleWithTransactions,
 } from '~/models/sale'
 import {prisma} from '.'
 import type {
@@ -143,6 +142,7 @@ export const createSaleRepository = (): SaleRepository => ({
     const sale = await prisma.sale.findUnique({
       where: {id},
       include: {
+        inventory: true,
         transactions: {
           include: {
             items: {
@@ -151,10 +151,13 @@ export const createSaleRepository = (): SaleRepository => ({
               },
             },
           },
+          orderBy: {
+            createdAt: 'desc',
+          },
         },
       },
     })
-    return sale as SaleWithTransactions | null
+    return sale as SaleWithInventoryAndTransactions | null
   },
   findByExternalId: async (externalId: string) => {
     const sale = await prisma.sale.findUnique({

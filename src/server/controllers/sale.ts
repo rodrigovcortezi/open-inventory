@@ -1,6 +1,7 @@
 import type {
   CheckAvailablityUseCase,
   GetAllSalesUseCase,
+  GetSaleUseCase,
   RegisterSaleUseCase,
   ReturnSaleUseCase,
 } from '~/usecases/sale'
@@ -13,6 +14,7 @@ export type SaleService = {
   getAllSales: GetAllSalesUseCase
   checkAvailability: CheckAvailablityUseCase
   returnSale: ReturnSaleUseCase
+  getSale: GetSaleUseCase
 }
 
 type SaleControllerParams = {
@@ -64,5 +66,15 @@ export const createSaleController = ({service}: SaleControllerParams) => {
     ctx.body = buildResponse({data: sale})
   }
 
-  return {registerSale, findAll, checkAvailability, returnSale}
+  const getSale = async (ctx: UserContext) => {
+    const id = parseInt(ctx.params.id, 10)
+    if (isNaN(id)) {
+      throw new ControllerError('Id must be an integer number')
+    }
+
+    const sale = await service.getSale(ctx.user?.email as string, id)
+    ctx.body = buildResponse({data: sale})
+  }
+
+  return {registerSale, findAll, checkAvailability, returnSale, getSale}
 }
