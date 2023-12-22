@@ -1740,6 +1740,14 @@ paths:
                 success: false
                 error:
                   message: Sale not found
+        422:
+          description: Invalid sale status
+          content:
+            application/json:
+              example:
+                success: false
+                error:
+                  message: Sale must be in executed status to be returned
   /sales/{id}:
     parameters:
       - name: id
