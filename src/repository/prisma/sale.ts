@@ -1,6 +1,6 @@
-import {SaleStatus} from '~/models/sale'
+import {SaleStatus, SaleWithInventory} from '~/models/sale'
 import {prisma} from '.'
-import type {CreateSaleDTO, SaleRepository} from '../sale'
+import type {CreateSaleDTO, SaleFilters, SaleRepository} from '../sale'
 import {TransactionType} from '~/models/inventory_transaction'
 
 export const createSaleRepository = (): SaleRepository => ({
@@ -65,5 +65,27 @@ export const createSaleRepository = (): SaleRepository => ({
       where: {external_id: externalId},
     })
     return sale ? {...sale, status: sale.status as SaleStatus} : null
+  },
+  findByBusinessId: async (businessId: number, filters: SaleFilters) => {
+    const businessInventories = await prisma.inventory.findMany({
+      where: {
+        businessId,
+        code: filters.inventoryCode,
+      },
+    })
+    const sales = await prisma.sale.findMany({
+      where: {
+        inventoryId: {
+          in: businessInventories.map(i => i.id),
+        },
+        createdAt: {
+          gte: filters.fromDate,
+          lte: filters.toDate,
+        },
+      },
+      include: {inventory: true},
+    })
+
+    return sales as SaleWithInventory[]
   },
 })

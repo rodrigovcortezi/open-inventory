@@ -1,3 +1,4 @@
+import type {Inventory} from './inventory'
 import {
   InventoryTransactionWithItems,
   type SafeInventoryTransactionWithItems,
@@ -22,11 +23,19 @@ export type SaleWithTransactions = Sale & {
   transactions: InventoryTransactionWithItems[]
 }
 
+export type SaleWithInventory = Sale & {
+  inventory: Inventory
+}
+
 export type SafeSale = Omit<Sale, 'inventoryId' | 'updatedAt'>
 
 export type SafeSaleWithTransactions = SafeSale & {
   inventory: string
   movements: SafeInventoryTransactionWithItems[]
+}
+
+export type SafeSaleWithInventory = SafeSale & {
+  inventory: string
 }
 
 export const safeSale = (sale: Sale): SafeSale => {
@@ -45,4 +54,10 @@ export const safeSaleWithTransactions = (
       ...safeInventoryTransactionWithItems(t),
     })),
   }
+}
+
+export const safeSaleWithInventory = (
+  sale: SaleWithInventory,
+): SafeSaleWithInventory => {
+  return {...safeSale(sale), inventory: sale.inventory.code}
 }

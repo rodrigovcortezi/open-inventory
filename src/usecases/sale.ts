@@ -4,6 +4,8 @@ import {
   SaleStatus,
   type SafeSale,
   safeSaleWithTransactions,
+  safeSaleWithInventory,
+  type SafeSaleWithInventory,
 } from '~/models/sale'
 import {ServiceError} from './error'
 import {Role} from '~/models/user'
@@ -32,10 +34,21 @@ type RegisterSaleDTO = {
   items: SaleItemDTO[]
 }
 
+type GetAllSalesOptions = {
+  inventoryCode?: string
+  fromDate?: Date
+  toDate?: Date
+}
+
 export type RegisterSaleUseCase = (
   loggedUserEmail: string,
   saleData: RegisterSaleDTO,
 ) => Promise<SafeSale>
+
+export type GetAllSalesUseCase = (
+  loggedUserEmail: string,
+  options: GetAllSalesOptions,
+) => Promise<SafeSaleWithInventory[]>
 
 export const createSaleService = ({
   userRepository,
@@ -110,5 +123,22 @@ export const createSaleService = ({
     })
 
     return safeSaleWithTransactions(sale, inventory.code)
+  },
+  getAllSales: async (loggedUserEmail: string, options: GetAllSalesOptions) => {
+    const authUser = await userRepository.findByEmail(loggedUserEmail)
+    if (!authUser) {
+      throw new ServiceError('User not found', 404)
+    }
+
+    if (authUser.role !== Role.ADMIN) {
+      throw new ServiceError('User not allowed', 403)
+    }
+
+    const sales = await saleRepository.findByBusinessId(
+      authUser.businessId,
+      options,
+    )
+
+    return sales.map(s => safeSaleWithInventory(s))
   },
 })
