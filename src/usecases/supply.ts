@@ -156,7 +156,7 @@ export const createSupplyService = ({
     }
 
     const supply = await supplyRepository.findById(supplyId)
-    if (!supply) {
+    if (!supply || supply.inventory.businessId !== authUser.businessId) {
       throw new ServiceError('Supply not found', 404)
     }
 
@@ -201,7 +201,7 @@ export const createSupplyService = ({
     }
 
     const supply = await supplyRepository.findById(id)
-    if (!supply) {
+    if (!supply || supply.inventory.businessId !== authUser.businessId) {
       throw new ServiceError('Supply not found', 404)
     }
 

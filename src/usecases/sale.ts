@@ -216,7 +216,7 @@ export const createSaleService = ({
     }
 
     const sale = await saleRepository.findById(saleId)
-    if (!sale) {
+    if (!sale || sale.inventory.businessId !== authUser.businessId) {
       throw new ServiceError('Sale not found', 404)
     }
 
@@ -258,7 +258,7 @@ export const createSaleService = ({
     }
 
     const sale = await saleRepository.findById(id)
-    if (!sale) {
+    if (!sale || sale.inventory.businessId !== authUser.businessId) {
       throw new ServiceError('Sale not found', 404)
     }
 
