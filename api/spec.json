@@ -1,0 +1,4144 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Open Inventory",
+    "version": "1.0.0",
+    "contact": {
+      "email": "rodrigovcortezi@gmail.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development"
+    }
+  ],
+  "paths": {
+    "/users": {
+      "post": {
+        "summary": "Register a new admin user and its business",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewUser"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User successfully registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserWithBusiness"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid request data",
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Invalid request data"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Email already in use",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "emailInUse": {
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Email is already in use"
+                      }
+                    }
+                  },
+                  "cnpjInUse": {
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "CNPJ is already in use"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin-users": {
+      "post": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Register a new admin user in the business",
+        "description": "Registers a new admin user in the authenticated user's business. This endpoint is restricted to admin users only.",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewUserInBusiness"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User successfully registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid request data",
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Invalid request data"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Email already in use",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Email is already in use"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/store-users": {
+      "post": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Register a new store user in the business",
+        "description": "Registers a new store user in the authenticated user's business. Typically this user is used by another system. This endpoint is restricted to admin users only.",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewUserInBusiness"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User successfully registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid request data",
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Invalid request data"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Email already in use",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Email is already in use"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/supplier-users": {
+      "post": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Register a new supplier user in the business",
+        "description": "Registers a new supplier user in the authenticated user's business. Typically this user is used by another system. This endpoint is restricted to admin users only.",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewSupplierUser"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User successfully registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SupplierUser"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid request data",
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Invalid request data"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Supplier not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Supplier not found"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Email already in use",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Email is already in use"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/login": {
+      "post": {
+        "summary": "Authenticate user",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthUser"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/TokenUser"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid request data",
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Invalid request data"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Incorrect user credentials",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Wrong email or password"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me": {
+      "put": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update authenticated user information",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUser"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserWithBusiness"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid request data",
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Invalid request data"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "sucess": false,
+                  "error": {
+                    "message": "User not found"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Email already in use",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Email is already in use"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me/business": {
+      "put": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update business information",
+        "description": "This endpoint is restricted to admin users only.",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBusiness"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Business successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Business"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid request data",
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Invalid request data"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "CNPJ already in use",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "CNPJ is already in use"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/suppliers": {
+      "post": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create a supplier",
+        "description": "This endpoint is restricted to admin users only.",
+        "tags": [
+          "Suppliers"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewSupplier"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Supplier successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Supplier"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid request data",
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Invalid request data"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Supplier already created",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "A supplier with the given cnpj already exists"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get all suppliers",
+        "description": "This endpoint is restricted to admin users only.",
+        "tags": [
+          "Suppliers"
+        ],
+        "responses": {
+          "200": {
+            "description": "Suppliers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Suppliers"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/suppliers/{supplierCode}": {
+      "parameters": [
+        {
+          "name": "supplierCode",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "MURFJ"
+          }
+        }
+      ],
+      "put": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update supplier information",
+        "description": "This endpoint is restricted to admin users only.",
+        "tags": [
+          "Suppliers"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSupplier"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Supplier successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Supplier"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid request data",
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Invalid request data"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Supplier not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Supplier not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete a supplier",
+        "description": "This endpoint is restricted to admin users only.",
+        "tags": [
+          "Suppliers"
+        ],
+        "responses": {
+          "204": {
+            "description": "Supplier successfully deleted"
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Supplier not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Supplier not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products": {
+      "post": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create a product",
+        "description": "This endpoint is restricted to admin users only.",
+        "tags": [
+          "Products"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewProduct"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Product"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid request data",
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Invalid request data"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Supplier not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Supplier not found"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "SKU already in use",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "SkuInUse": {
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "SKU already in use"
+                      }
+                    }
+                  },
+                  "EanInUse": {
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "EAN already in use"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get all products",
+        "description": "This endpoint is restricted to admin users only.",
+        "tags": [
+          "Products"
+        ],
+        "responses": {
+          "200": {
+            "description": "Products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Products"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{productSku}": {
+      "parameters": [
+        {
+          "name": "productSku",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "xxx-yyyy-zzzz"
+          }
+        }
+      ],
+      "put": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update product information",
+        "description": "This endpoint is restricted to admin users only.",
+        "tags": [
+          "Products"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProduct"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Product"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid request data",
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Invalid request data"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "productNotFound": {
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Product not found"
+                      }
+                    }
+                  },
+                  "supplierNotFound": {
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Supplier not found"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "SKU already in use",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "SkuInUse": {
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "SKU already in use"
+                      }
+                    }
+                  },
+                  "EanInUse": {
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "EAN already in use"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete a product",
+        "description": "This endpoint is restricted to admin users only.",
+        "tags": [
+          "Products"
+        ],
+        "responses": {
+          "204": {
+            "description": "Product successfully deleted"
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Product not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inventories": {
+      "post": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create an inventory",
+        "description": "This endpoint is restricted to admin users only.",
+        "tags": [
+          "Inventories"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewInventory"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Inventory successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Inventory"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid request data",
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Invalid request data"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get all inventories",
+        "description": "This endpoint is restricted to admin users only.",
+        "tags": [
+          "Inventories"
+        ],
+        "responses": {
+          "200": {
+            "description": "Inventories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Inventories"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inventories/{inventoryCode}": {
+      "put": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          },
+          {
+            "in": "path",
+            "name": "inventoryCode",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "KNRUG"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update inventory information",
+        "description": "This endpoint is restricted to admin users only.",
+        "tags": [
+          "Inventories"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInventory"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inventory successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Inventory"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid request data",
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Invalid request data"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Inventory not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Inventory not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          },
+          {
+            "in": "path",
+            "name": "inventoryCode",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "KNRUG"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete an inventory",
+        "description": "This endpoint is restricted to admin users only.",
+        "tags": [
+          "Inventories"
+        ],
+        "responses": {
+          "204": {
+            "description": "Inventory successfully deleted"
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Inventory not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Inventory not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inventories/{inventoryCode}/products/{productSKU}": {
+      "parameters": [
+        {
+          "name": "inventoryCode",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "KNRUG"
+          }
+        },
+        {
+          "name": "productSKU",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "xxx-yyyy-zzzz"
+          }
+        }
+      ],
+      "post": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create an inventory adjustment",
+        "description": "This endpoint is restricted to admin users only.",
+        "tags": [
+          "Inventories"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewInventoryMovement"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Inventory movement successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/InventoryWithProducts"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid request data",
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Invalid request data"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "inventoryNotFound": {
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Inventory not found"
+                      }
+                    }
+                  },
+                  "productNotFound": {
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Product not found"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable movement",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "A product's quantity in a inventory cannot be lower than zero"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inventories/{inventoryCode}/products": {
+      "parameters": [
+        {
+          "name": "inventoryCode",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "KNRUG"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Get inventory products",
+        "description": "This endpoint is restricted to admin and supplier users only. Supplier users only get products which it supplies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          },
+          {
+            "name": "productSku",
+            "in": "query",
+            "required": false,
+            "description": "Filter the results by a specific product",
+            "schema": {
+              "type": "string",
+              "example": "xxx-yyyy-zzzz"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Inventories"
+        ],
+        "responses": {
+          "200": {
+            "description": "Inventory products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/InventoryWithProducts"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Inventory not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Inventory not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inventories/{inventoryCode}/movements": {
+      "parameters": [
+        {
+          "name": "inventoryCode",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "KNRUG"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Get inventory movements",
+        "description": "This endpoint is restricted to admin and supplier users only. Supplier users only get products which it supplies",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          },
+          {
+            "name": "fromDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "2023-10-20T10:00:00.000Z"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "2023-11-20T10:00:00.000Z"
+            }
+          },
+          {
+            "name": "productSKU",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "xxx-yyyy-zzzz"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Inventories"
+        ],
+        "responses": {
+          "200": {
+            "description": "Inventory movements",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/InventoryMovements"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Inventory not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Inventory not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inventories/products/{productSku}": {
+      "parameters": [
+        {
+          "name": "productSku",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "xxx-yyyy-zzzz"
+          }
+        }
+      ],
+      "get": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get a product inventories",
+        "description": "This endpoint is restricted to admin and supplier users only. Supplier users only get products which it supplies",
+        "tags": [
+          "Inventories"
+        ],
+        "responses": {
+          "200": {
+            "description": "Product inventories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ProductInventories"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Product not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sales": {
+      "post": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create a sale",
+        "description": "This endpoint is restricted to store users only.",
+        "tags": [
+          "Sales"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewSale"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sale successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SaleWithMovement"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid request data",
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Invalid request data"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Inventory not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Inventory not found"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable sale",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "unavailableProduct": {
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Some product quantity is not available"
+                      }
+                    }
+                  },
+                  "duplicatedSale": {
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "A sale with the same external id is already registered"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all sales",
+        "description": "This endpoint is restricted to admin users only.",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          },
+          {
+            "name": "inventoryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "KNRUG"
+            }
+          },
+          {
+            "name": "fromDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "2023-10-20T10:00:00.000Z"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "2023-11-20T10:00:00.000Z"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Sales"
+        ],
+        "responses": {
+          "200": {
+            "description": "Sales",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Sales"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sales/check-availability": {
+      "post": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Check product availability before a sale",
+        "description": "This endpoint is restricted to store users only.",
+        "tags": [
+          "Sales"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvailabilityCheck"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inventories with product availability",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "inventories": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "example": [
+                            "KNRUG",
+                            "TRVHP"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid request data",
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Invalid request data"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Product not found"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Products unavailable",
+            "content": {
+              "application/json": {
+                "example": {
+                  "succes": false,
+                  "error": {
+                    "message": "Products unavailable"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sales/{id}/return": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "example": 164
+          }
+        }
+      ],
+      "post": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Return a sale",
+        "description": "This endpoint is restricted to store users only.",
+        "tags": [
+          "Sales"
+        ],
+        "responses": {
+          "200": {
+            "description": "Sale successfully returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SaleReturnedWithMovement"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sale not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Sale not found"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid sale status",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Sale must be in executed status to be returned"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sales/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "example": 164
+          }
+        }
+      ],
+      "get": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get sale information",
+        "description": "This endpoint is restricted to admin users only.",
+        "tags": [
+          "Sales"
+        ],
+        "responses": {
+          "200": {
+            "description": "Sale information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SaleWithMovement"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sale not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Sale not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/supplies": {
+      "post": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create a supply",
+        "description": "This endpoint is restricted to supplier users only.",
+        "tags": [
+          "Supplies"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewSupply"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Supply successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SupplyWithMovement"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid request data",
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "Invalid request data"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Inventory not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Inventory not found"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable supply",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "duplicatedSupply": {
+                    "value": {
+                      "success": false,
+                      "error": {
+                        "message": "A supply with the same external id is already registered"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all supplies",
+        "description": "This endpoint is restricted to admin users only.",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          },
+          {
+            "name": "inventoryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "KNRUG"
+            }
+          },
+          {
+            "name": "fromDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "2023-11-15T10:00:00.000Z"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "2023-11-20T10:00:00.000Z"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Supplies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Supplies",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Supplies"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/supplies/{id}/return": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "example": 80
+          }
+        }
+      ],
+      "post": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Return a supply",
+        "description": "This endpoint is restricted to supplier users only.",
+        "tags": [
+          "Supplies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Supply successfully returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SupplyReturnedWithMovement"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Supply not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Supply not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/supplies/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "example": 80
+          }
+        }
+      ],
+      "get": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer token for authorization"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get supply information",
+        "description": "This endpoint is restricted to admin users only.",
+        "tags": [
+          "Supplies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Supply information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SupplyWithMovement"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated user",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User is not authenticated"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User not allowed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "User not allowed"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Supply not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "error": {
+                    "message": "Supply not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Business": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Loja de construção"
+          },
+          "cnpj": {
+            "type": "string",
+            "example": "33.534.446/0001-55"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Rodrigo Cortezi"
+          },
+          "email": {
+            "type": "string",
+            "example": "rodrigovcortezi@gmail.com"
+          },
+          "password": {
+            "type": "string",
+            "writeOnly": true,
+            "example": "secretpassword"
+          }
+        }
+      },
+      "UserWithBusiness": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/User"
+          }
+        ],
+        "properties": {
+          "business": {
+            "$ref": "#/components/schemas/Business"
+          }
+        }
+      },
+      "NewUser": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UserWithBusiness"
+          }
+        ],
+        "properties": {
+          "business": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Business"
+              }
+            ],
+            "required": [
+              "name",
+              "cnpj"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "password",
+          "business"
+        ]
+      },
+      "NewUserInBusiness": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/User"
+          }
+        ],
+        "required": [
+          "name",
+          "email",
+          "password"
+        ]
+      },
+      "NewSupplierUser": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NewUserInBusiness"
+          }
+        ],
+        "properties": {
+          "supplierCode": {
+            "type": "string",
+            "example": "MURFJ"
+          }
+        },
+        "required": [
+          "supplierCode"
+        ]
+      },
+      "SupplierUser": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/User"
+          }
+        ],
+        "properties": {
+          "supplier": {
+            "type": "string",
+            "example": "MURFJ"
+          }
+        }
+      },
+      "UpdateUser": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/User"
+          }
+        ]
+      },
+      "AuthUser": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/User"
+          }
+        ],
+        "properties": {
+          "name": {
+            "readOnly": true
+          },
+          "business": {
+            "readOnly": true
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "TokenUser": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/User"
+          }
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiRmFiaW8iLCJlbWFpbCI6ImZhYmlvQGdtYWlsLmNvbSIsImlhdCI6MTcwMDkzNDE1NywiZXhwIjoxNzA2MTE4MTU3fQ.iDHJTbAfbgk1qQ449kvc5qmWV2L_D6lbB0mUzVGqlPE"
+          },
+          "business": {
+            "writeOnly": true
+          }
+        }
+      },
+      "UpdateBusiness": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Business"
+          }
+        ]
+      },
+      "Supplier": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Fornecimento de alimentos"
+          },
+          "cnpj": {
+            "type": "string",
+            "example": "27.194.080/0001-10"
+          },
+          "code": {
+            "type": "string",
+            "example": "MURFJ",
+            "readOnly": true
+          },
+          "business": {
+            "$ref": "#/components/schemas/Business"
+          }
+        }
+      },
+      "Suppliers": {
+        "type": "object",
+        "properties": {
+          "suppliers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Supplier"
+            }
+          }
+        }
+      },
+      "NewSupplier": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Supplier"
+          }
+        ],
+        "properties": {
+          "business": {
+            "readOnly": true
+          }
+        },
+        "required": [
+          "name",
+          "cnpj"
+        ]
+      },
+      "UpdateSupplier": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Supplier"
+          }
+        ],
+        "properties": {
+          "business": {
+            "readOnly": true
+          }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Milho"
+          },
+          "description": {
+            "type": "string",
+            "example": "Milho em lata"
+          },
+          "sku": {
+            "type": "string",
+            "example": "xxx-yyyy-zzzz"
+          },
+          "ean": {
+            "type": "string",
+            "example": "xxx-yyyy-zzzz"
+          },
+          "supplierCode": {
+            "type": "string",
+            "example": "MURFJ"
+          }
+        }
+      },
+      "Products": {
+        "type": "object",
+        "properties": {
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          }
+        }
+      },
+      "NewProduct": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Product"
+          }
+        ],
+        "required": [
+          "name",
+          "sku",
+          "ean",
+          "supplierCode"
+        ]
+      },
+      "UpdateProduct": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Product"
+          }
+        ]
+      },
+      "Inventory": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Estoque principal"
+          },
+          "code": {
+            "type": "string",
+            "example": "KNRUG",
+            "readOnly": true
+          }
+        }
+      },
+      "Inventories": {
+        "type": "object",
+        "properties": {
+          "inventories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Inventory"
+            }
+          }
+        }
+      },
+      "NewInventory": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Inventory"
+          }
+        ],
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateInventory": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Inventory"
+          }
+        ]
+      },
+      "ProductMovement": {
+        "type": "object",
+        "properties": {
+          "sku": {
+            "type": "string",
+            "example": "xxx-yyyy-zzzz"
+          },
+          "quantity": {
+            "type": "integer",
+            "example": 10
+          }
+        }
+      },
+      "InventoryMovement": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "example": "2023-11-20T10:00:00.000Z",
+            "readOnly": true
+          },
+          "type": {
+            "type": "string",
+            "example": "ADJUSTMENT",
+            "readOnly": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductMovement"
+            }
+          }
+        }
+      },
+      "NewInventoryMovement": {
+        "type": "object",
+        "properties": {
+          "variation": {
+            "type": "integer",
+            "example": 100
+          }
+        },
+        "required": [
+          "variation"
+        ]
+      },
+      "InventoryMovements": {
+        "type": "object",
+        "properties": {
+          "movements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryMovement"
+            }
+          }
+        }
+      },
+      "ProductInventory": {
+        "type": "object",
+        "properties": {
+          "sku": {
+            "type": "string",
+            "example": "xxx-yyyy-zzzz"
+          },
+          "quantity": {
+            "type": "integer",
+            "example": 100
+          }
+        }
+      },
+      "ProductInInventory": {
+        "type": "object",
+        "properties": {
+          "inventory": {
+            "type": "string",
+            "example": "KNRUG"
+          },
+          "quantity": {
+            "type": "integer",
+            "example": 10
+          }
+        }
+      },
+      "ProductInventories": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Product"
+          }
+        ],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "example": 500
+          },
+          "inventories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductInInventory"
+            },
+            "example": [
+              {
+                "inventory": "KNRUG",
+                "quantity": 300
+              },
+              {
+                "inventory": "YPHYT",
+                "quantity": 200
+              }
+            ]
+          }
+        }
+      },
+      "InventoryWithProducts": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Inventory"
+          }
+        ],
+        "properties": {
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductInventory"
+            }
+          }
+        }
+      },
+      "SaleInventoryMovement": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/InventoryMovement"
+          }
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "SALE"
+          }
+        }
+      },
+      "ReturnInventoryMovement": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/InventoryMovement"
+          }
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "SALE_RETURN"
+          }
+        }
+      },
+      "SupplyInventoryMovement": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/InventoryMovement"
+          }
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "SUPPLY"
+          }
+        }
+      },
+      "Sale": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 164,
+            "readOnly": true
+          },
+          "externalID": {
+            "type": "string",
+            "example": "external-id"
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "2023-11-20T10:00:00.000Z",
+            "readOnly": true
+          },
+          "inventory": {
+            "type": "string",
+            "example": "KNRUG"
+          },
+          "status": {
+            "type": "string",
+            "example": "EXECUTED",
+            "readOnly": true
+          }
+        }
+      },
+      "SaleWithMovement": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Sale"
+          }
+        ],
+        "properties": {
+          "movements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SaleInventoryMovement"
+            }
+          }
+        }
+      },
+      "SaleReturnedWithMovement": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Sale"
+          }
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "RETURNED",
+            "readOnly": true
+          },
+          "movements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnInventoryMovement"
+            },
+            "example": [
+              {
+                "inventory": "KNRUG",
+                "timestamp": "2023-11-20T10:00:00.000Z",
+                "type": "SALE_RETURN",
+                "items": [
+                  {
+                    "sku": "xxx-yyyy-zzzz",
+                    "quantity": 10
+                  }
+                ]
+              },
+              {
+                "inventory": "KNRUG",
+                "timestamp": "2023-11-15T10:00:00.000Z",
+                "type": "SALE",
+                "items": [
+                  {
+                    "sku": "xxx-yyyy-zzzz",
+                    "quantity": -10
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "Sales": {
+        "type": "object",
+        "properties": {
+          "sales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Sale"
+            }
+          }
+        }
+      },
+      "NewSale": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Sale"
+          }
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductMovement"
+            }
+          }
+        },
+        "required": [
+          "externalID",
+          "inventory",
+          "items"
+        ]
+      },
+      "Supply": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 80,
+            "readOnly": true
+          },
+          "externalID": {
+            "type": "string",
+            "example": "external-id"
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "2023-11-20T10:00:00.000Z",
+            "readOnly": true
+          },
+          "inventory": {
+            "type": "string",
+            "example": "KNRUG"
+          },
+          "supplier": {
+            "type": "string",
+            "example": "MURFJ",
+            "readOnly": true
+          },
+          "status": {
+            "type": "string",
+            "example": "EXECUTED",
+            "readOnly": true
+          }
+        }
+      },
+      "Supplies": {
+        "type": "object",
+        "properties": {
+          "supplies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Supply"
+            }
+          }
+        }
+      },
+      "NewSupply": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Supply"
+          }
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductMovement"
+            }
+          }
+        },
+        "required": [
+          "externalID",
+          "inventory",
+          "supplier",
+          "items"
+        ]
+      },
+      "SupplyWithMovement": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Supply"
+          }
+        ],
+        "properties": {
+          "movements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyInventoryMovement"
+            }
+          }
+        }
+      },
+      "SupplyReturnedWithMovement": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Supply"
+          }
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "RETURNED",
+            "readOnly": true
+          },
+          "movements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnInventoryMovement"
+            },
+            "example": [
+              {
+                "inventory": "KNRUG",
+                "timestamp": "2023-11-20T10:00:00.000Z",
+                "type": "SUPPLY_RETURN",
+                "items": [
+                  {
+                    "sku": "xxx-yyyy-zzzz",
+                    "quantity": -10
+                  }
+                ]
+              },
+              {
+                "inventory": "KNRUG",
+                "timestamp": "2023-11-15T10:00:00.000Z",
+                "type": "SUPPLY",
+                "items": [
+                  {
+                    "sku": "xxx-yyyy-zzzz",
+                    "quantity": 10
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "AvailabilityCheck": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "sku": {
+                  "type": "string"
+                },
+                "quantity": {
+                  "type": "integer"
+                }
+              }
+            },
+            "example": [
+              {
+                "sku": "xxx-yyyy-zzzz",
+                "quantity": 2
+              },
+              {
+                "sku": "xxx-yyyy-wwww",
+                "quantity": 1
+              }
+            ]
+          }
+        },
+        "required": [
+          "items"
+        ]
+      }
+    }
+  }
+}
